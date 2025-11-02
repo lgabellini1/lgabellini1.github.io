@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600&display=swap');
+
+body {
+  background-color: #fafafa;
+  color: #222;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.site-header {
+  text-align: center;
+  padding: 80px 20px 40px;
+}
+
+.site-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3em;
+  margin-bottom: 0.2em;
+}
+
+.site-header p {
+  color: #666;
+  font-size: 1.1em;
+}
+
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.project-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+}
+
+.project-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.project-info {
+  padding: 20px;
+}
+
+.project-info h2 {
+  font-family: 'Playfair Display', serif;
+  margin-top: 0;
+}
+
+.project-info a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.project-info a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+  font-size: 0.9em;
+}
