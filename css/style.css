@@ -37,12 +37,16 @@ p {
     margin-bottom: 1.25rem;
 }
 
+.slider:focus {
+    outline: none;
+}
+
 figure {
     margin: 2rem 0;
     text-align: center;
 }
 
-figure img, 
+figure img,
 figure video {
     max-width: 100%;
     height: auto;
@@ -56,6 +60,11 @@ figure figcaption {
     font-size: 0.875rem;
     color: #666;
     margin-top: 0.5rem;
+}
+
+.slider img {
+    cursor: auto;
+    margin: 0;
 }
 
 li {

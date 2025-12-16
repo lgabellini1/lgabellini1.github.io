@@ -8,8 +8,11 @@
   <title>Death Stranding Terrain Scan in UE5</title>
   <link rel="stylesheet" 
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap">
+  <link rel="stylesheet" 
+        href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/twentytwenty.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
 </head>
 <body>
   <main>
@@ -183,18 +186,28 @@
         </p>
         
         <figure>
+          <!--
           <div id="container1">
             <img src="../assets/terrain_scan/images/icons_terrainview.png" 
                  alt="Icons / normal map comparison" data-zoomable loading="lazy" />
             <img src="../assets/terrain_scan/images/icons_normalview.png"
                  alt="Icons / normal map comparison" data-zoomable loading="lazy" />
           </div>
+          -->
+          <img-comparison-slider class="slider">
+            <img slot="first"
+                 src="../assets/terrain_scan/images/icons_terrainview.png"
+                 alt="Comparison: icons" />
+            <img slot="second"
+                 src="../assets/terrain_scan/images/icons_normalview.png"
+                 alt="Comparison: normal map" />
+          </img-comparison-slider>
           <figcaption>
             Comparison between terrain icon distribution and normal map. Normals perpendicular to the terrain 
             (blueish in the image) yield primarily blue icons.
           </figcaption>
         </figure>
-        
+  
         <p>
           A sine wave "pushing" through the grid is used to replicate the vertical oscillation of the icons. Together
           with the pulsing opacity animation, which periodically hides and shows back the icons, this forms the core
