@@ -1,55 +1,392 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Death Stranding Terrain Scan | Luca Gabellini</title>
-  <link rel="stylesheet" href="../assets/style.css" />
+  <title>Death Stranding Terrain Scan in UE5</title>
+  <link rel="stylesheet" 
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/twentytwenty.css" />
 </head>
 <body>
-  <header class="site-header">
-    <h1>Death Stranding Terrain Scan</h1>
-  </header>
+  <main>
+    <article>
+      <header>
+        <h1>Death Stranding Terrain Scan in Unreal Engine 5</h1>
+      </header>
+      
+      <div>
+        <h2>Terrain scan lines</h2>
+    
+        <p>
+          The bulk of the effect consists of the scan wave cone, which sweeps through terrain obstacles 
+          and vegetation into the far distance. This is achieved by means of a single, unbounded post-process 
+          volume placed in the world map; a post-process material shader is then associated with this volume. 
+          To allow the effect to change its appearance dynamically, the material is bound to a Material Parameter 
+          Collection (MPC), enabling the shader to be updated from gameplay code without need for a recompilation.
+        </p>
+    
+        <p>
+          To make each scan line outline the terrain geometry, we rely on a standard Sobel operator, 
+          most commonly used in edge detection problems. Essentially, scene depth is sampled at a given pixel 
+          and at each of its neighbours, and the differences between values are summed. A large sum indicates 
+          an edge pixel (see <a href="https://www.vertexfragment.com/ramblings/unity-postprocessing-sobel-outline/" 
+                                  target="_blank" rel="noopener noreferrer">this article</a>
+          for a more detailed explanation in the context of the Unity post-processing pipeline).
+        </p>
+    
+        <p>
+          The issue with a standard depth-based Sobel filter is that, since scene depth buffer values are 
+          camera-dependent, the scan lines get recalculated every time the camera moves. Therefore, need arose 
+          for a modified Sobel filter that operates on static world position distances. A proven method to achieve
+          that is to convert a pixel's screen UV coordinates and depth into clip-space, by constructing clip-space manually.
+          That position is then multiplied by the clip-to-world matrix, yielding world-position as output.
+          Custom HLSL lines where required to access a few things in the engine shader code not exposed as
+          nodes (like the "raw", non-linearized depth buffer, named DeviceZ and transformation matrices from the uniform
+          view buffer).
+        </p>
+        
+        <figure>
+          <img src="../assets/terrain_scan/images/mf_screentoworld.png" 
+               alt="ScreenToWorldPosition script" data-zoomable />
+          <figcaption>
+            Material function script for calculating the world position of a pixel. 
+          </figcaption>
+        </figure>
+        
+        <p>
+          As shown in the image, Unreal's Custom Depth buffer was used to handle translucent surfaces
+          (like water bodies). Translucent materials do not normally write to the depth buffer; 
+          that would cause the scanner to unintendedly outline underwater terrain instead of the water surface. 
+          If a closer custom depth value is found, it is given priority.
+        </p>
+        
+        <figure>
+          <img src="../assets/terrain_scan/images/m_sobel.png"
+               alt="Sobel filter" data-zoomable />
+          <figcaption>
+            Material nodes calculating distances for the Sobel operator. This operation is repeated 
+            with different screen UV coordinates for each of the four neighbouring pixel.
+          </figcaption>
+        </figure>
+    
+        <p>The resulting effect mask looks like this (with the addition of angle and distance variations):</p>
+        
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/LS_ScanMaskSequence.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            Sobel outline visualization. Restricted along the distance and an angle, it forms the basis
+            of the scanner effect.
+          </figcaption>
+        </figure>
+    
+        <p>
+          The final visual result is obtained by compositing the mask together with other effects 
+          (edge gradient, darkening), and then multiplying the result with the scene's base color.
+        </p>
+        
+        <figure>
+          <img src="../assets/terrain_scan/images/m_final.png"
+               alt="Scan lines final compositing" data-zoomable />
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/LS_EffectCompositing.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            Final effect compositing. Above, the node graph section; below, its corresponding effect on the material.
+          </figcaption>
+        </figure>
 
-  <main class="article">
-    <section>
-      <img src="../assets/images/deathstranding_hero.jpg" alt="Terrain Overview" style="width:100%; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
-      <h2>Overview</h2>
-      <p>This project explores photorealistic terrain generation inspired by <em>Death Stranding</em>. The focus was on capturing the mood and lighting using Unreal Engine 5’s Lumen and Nanite systems.</p>
-    </section>
+        <p>
+          Due to its large size, the full node graph is omitted.
+        </p>
+        
+        <p>
+          As mentioned at the beginning of this section, the material animation logic lies in code. To be precise, a
+          ScannerController component (attached to the player) ticks every frame and updates the effect's velocity 
+          (from which the current range is derived) and opacity. 
+          The scan lives through four different phases, each of which calculates these parameters either
+          as a constant value or a linearly growing function. The complete code can be checked out at the 
+          <a href="https://github.com/lgabellini1/UE5-Death-Stranding-Terrain-Scan" 
+             target="_blank" rel="noopener noreferrer">
+            project's GitHub repository.
+          </a>
+        </p>
 
-    <section>
-      <h2>Technical Breakdown</h2>
-      <ul>
-        <li>Procedural landscape with multi-layer material blending</li>
-        <li>Dynamic fog and volumetric lighting setup</li>
-        <li>Custom shader for rock/moss transitions</li>
-        <li>Sequencer cinematic captures</li>
-      </ul>
-    </section>
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/scan_showreel.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            The final scan lines effect.
+          </figcaption>
+        </figure>
 
-    <section>
-      <h2>Gallery</h2>
-      <img src="../assets/images/deathstranding_01.jpg" alt="Close-up terrain detail">
-      <img src="../assets/images/deathstranding_02.jpg" alt="Fog and lighting test">
-    </section>
+        <p class="note">
+          A note on <strong>antialiasing</strong>: the material is not made with TAA (Temporal Anti-Aliasing) in mind. As explained in the
+          <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/post-process-materials-in-unreal-engine#temporal-anti-aliasing-or-why-the-g-buffer-jitters" 
+             target="_blank" rel="noopener noreferrer">
+            official documentation
+          </a>, 
+          TAA makes depth-based, post-process effects jitter by 1 pixel. To fix this, one would need to set its Blendable Location before 
+          the application of TAA. This could of course be done, but it would require a reworking of the material as it is now 
+          to make it look like its intended appearance. As such, the material currently works right with FXAA (Fast Approximate Anti-Aliasing)
+          or no antialiasing at all.
+        </p>
+    
+        <h2>Terrain icons</h2>
+    
+        <p>
+          In <i>Death Stranding</i>, the scan casts a set of icons which hover on the terrain for a time, 
+          and serve a gameplay purpose by informing the player about terrain steepness and other characteristics 
+          (water depth, presence of tall vegetation, etc...). Since several hundred icons must be rendered simultaneously, 
+          each with its own position and visual properties, it seemed well-suited to use Niagara 
+          (Unreal Engine’s particle system) to implement a compute shader.
+        </p>
+    
+        <p>
+          A grid of particles is spawned and constrained within the scan angle; each particle represents a single 
+          terrain icon. To ensure the icons rest accurately on the terrain surface, we need access to terrain depth. 
+          Niagara gives access to a Landscape Data Interface, which allows to read information on the landscape natively
+          inside the emitter, including its depth texture. The issue with that is it would yield wrong icon placement 
+          results on regular static meshes, including Instanced Static Meshes which make a large part of our landscape's 
+          rocky formations, but do not actually contribute to its depth.
+        </p>
+        
+        <p>
+          A better, more general approach was achieved using scene capture components, which are specialized cameras 
+          that can "photograph" a certain scene buffer from their view frustum; when the scan starts, an orthographic 
+          camera is set in front of the player looking down the terrain, and saves depth information into a render target texture. 
+          Each particle can then sample the texture at its location projected on the texture UV space, and compute 
+          its height using depth from camera.
+        </p>
+        
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/depth_visualizationv2.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            Depth capture visualization. The SceneCapture component's view frustum is displayed as an orange box. Depth
+            values saved in the texture color are seen mirroring the terrain's valleys (in white) and peaks (in black).
+          </figcaption>
+        </figure>
+        
+        <p>
+          An analogous approach is used for recording terrain normals and determine terrain slope. The slope value is then
+          used to select the particle's color and a two-dimensional vector of ints, which represent the UV coordinates of
+          that type of terrain icon inside a small texture atlas. The material used for the sprites then simply receives the
+          data, samples the atlas at the given coordinates and outputs the color as emissive.
+        </p>
+        
+        <figure>
+          <div id="container1">
+            <img src="../assets/terrain_scan/images/icons_terrainview.png" 
+                 alt="Icons / normal map comparison" data-zoomable />
+            <img src="../assets/terrain_scan/images/icons_normalview.png"
+                 alt="Icons / normal map comparison" data-zoomable />
+          </div>
+          <figcaption>
+            Comparison between terrain icon distribution and normal map. Normals perpendicular to the terrain 
+            (blueish in the image) yield primarily blue icons.
+          </figcaption>
+        </figure>
+        
+        <p>
+          A sine wave "pushing" through the grid is used to replicate the vertical oscillation of the icons. Together
+          with the pulsing opacity animation, which periodically hides and shows back the icons, this forms the core
+          animation of the effect.
+        </p>
 
-    <section>
-      <h2>Video Showcase</h2>
-      <iframe width="100%" height="480" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe>
-    </section>
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/opacity_animation.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            Animation of the grid of icons, showing the pulsing effect and icon oscillation.
+          </figcaption>
+        </figure>
+        
+        <p>
+          Other types of terrain can also be scanned. For example, rocky surfaces, bodies of water and trails each employ 
+          a special type of icon. To implement these, we leverage Unreal's Custom Stencil buffer, part of the Custom
+          Depth pass we introduce in the previous section. A stencil is a single byte representing an object id, 
+          meaning we can represent up to 256 different type of objects; more than sufficient for our terrain 
+          types. 
+        </p>
+        
+        <p>
+          We use therefore special bounding box actors with no collision, which write only to the custom depth buffer 
+          and, as such, are not rendered in the final scene. Another scene capture component reads the stencil byte 
+          from the buffer at the icon's position: that integer is the terrain type.
+        </p>
 
-    <section>
-      <h2>Credits</h2>
-      <p>Inspired by <strong>Death Stranding</strong> by Kojima Productions.<br>
-      Terrain materials and assets from <a href="https://quixel.com" target="_blank">Quixel Megascans</a>.</p>
-    </section>
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/stencils.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            Visualization of stencils from the custom depth buffer, and corresponding icon spawn.
+          </figcaption>
+        </figure>
+        
+        <p>
+          Below a showreel of the final particle system behaviour, including additional effects like
+          the red flare for icons indicating unwalkable terrain. It is implemented in the emitter 
+          as an alternative particle renderer bound to red icons specifically, and such that the sum of 
+          the opacity of the flare and the opacity of the icon is always equal to 1 (as one grows, the
+          other fades until it becomes invisible).
+        </p>
 
-    <p><a href="../index.html">← Back to portfolio</a></p>
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/icons_showreel.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            The final scanner effect, with inclusion of terrain icons.
+          </figcaption>
+        </figure>
+        
+        As we did for the scan lines effect, we omit most of the internal logic of the Niagara system for brevity. To leave
+        a general rundown of its steps, below the overview of the particle system.
+        
+        <figure>
+          <img src="../assets/terrain_scan/images/particle.png"
+               alt="Icons particle system overview" data-zoomable />
+          <figcaption>
+            Icons particle system overview.
+          </figcaption>
+        </figure>
+    
+        <h2>Footsteps</h2>
+    
+        <p>
+          The last feature of the effect is the footstep system. In <i>Death Stranding</i>, as the player character walks, 
+          footprints appear on the terrain; when a scan occurs, all the footprints inside the scan area of effect are 
+          highlighted in bright blue. Fresh footprints inside the area also get highlighted on walking. When the effect 
+          terminates, the brightness starts to gradually fade.
+        </p>
+        
+        <p>
+          Footprint spawning is managed via animation notifies, which allow specific animation keyframes to trigger 
+          gameplay events. When a footstep event occurs, a downward raycast tries to hit a ground surface and, 
+          if successful, a footprint decal is spawned at that position. Usage of decals ensures accurate projection of 
+          the footprint regardless of terrain conformation. As their lifetime expires, the footprints start to fade 
+          and then despawn.
+        </p>
+
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/footprints.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            Footprint placement. Each decal fades autonomously according to its own lifetime.
+          </figcaption>
+        </figure>
+        
+        <p>
+          As both types of footprints (highlighted and non-highlighted) can be present in-game at the same time,
+          we need a different material instance for each of them. As all the highlighted fade simultaneously, thus 
+          all share the same appearance, a single material is sufficient. 
+        </p>
+
+        <figure>
+          <video data-zoomable autoplay loop muted>
+            <source src="../assets/terrain_scan/videos/footprints_highlight.mp4" type="video/mp4">
+          </video>
+          <figcaption>
+            Footprint highlighting and fading.
+          </figcaption>
+        </figure>
+    
+        <h2>Conclusions</h2>
+    
+        <p>
+          Although we've covered most of the effect features present in the original game, there's still room for improvement:
+        </p>
+        <ul>
+          <li>
+            We relied on manually placed bounding box actors to target special icon areas. This approach is pretty much unfeasible
+            on large, open-world maps: I'd guess <i>Death Stranding</i> uses some kind of method to generate these automatically
+            for its environments. This is of course much beyond the scope of this demo project.
+          </li>
+          <li>
+            Reduce aliasing on the scan lines, which currently appear quite blocky especially from specific camera angles; a possible
+            direction to investigate for improvement is to treat the scan lines as signed distance fields (SDFs) and apply AA techniques on
+            them (see <a href="https://drewcassidy.me/2020/06/26/sdf-antialiasing/">this article</a>).
+          </li>
+          <li>
+            Refine terrain type detection, which is currently based on a simple normal direction check. Small imprecisions 
+            at particular spots in the terrain's normal map can easily yield wrong icons especially in relation to 
+            its surrounding icons. A possible heuristic is to also weigh in an area of icons to get a better understanding
+            of the terrain's conformation and correct anomalous values.
+          </li>
+        </ul>
+      </div>
+    </article>
   </main>
 
-  <footer>
-    <p>© 2025 Luca Gabellini</p>
-  </footer>
+  <script src="https://code.jquery.com/jquery-3.7.1.js" 
+          integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" 
+          crossorigin="anonymous"></script>
+  <script src="../js/jquery.event.move.js"></script>
+  <script src="../js/jquery.twentytwenty.js"></script>
+
+  <script>
+    $(window).on("load", function() {
+      $("#container1").twentytwenty({
+        default_offset_pct: 0.7,
+        orientation: "horizontal",
+        before_label: "Final scene",
+        after_label: "Normal map"
+      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener('click', function(e) {
+      const media = e.target.closest('[data-zoomable]');
+      if (!media) return;
+
+      // Prevent multiple zooms
+      if (document.querySelector('.simple-zoom-overlay')) return;
+
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'simple-zoom-overlay';
+
+      // Clone media
+      const clone = media.cloneNode(true);
+      clone.className = 'simple-zoom-media';
+      clone.removeAttribute('data-zoomable');
+
+      overlay.appendChild(clone);
+      document.body.appendChild(overlay);
+
+      // Disable scrolling
+      document.body.style.overflow = 'hidden';
+
+      // Fade in overlay
+      requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+      });
+
+      function closeZoom() {
+        overlay.style.opacity = '0';
+        document.body.style.overflow = '';
+        setTimeout(() => overlay.remove(), 250);
+        document.removeEventListener('keydown', onKey);
+      }
+
+      function onKey(e) {
+        if (e.key === 'Escape') closeZoom();
+      }
+
+      overlay.addEventListener('click', closeZoom);
+      document.addEventListener('keydown', onKey);
+    });
+  </script>
+
 </body>
 </html>
