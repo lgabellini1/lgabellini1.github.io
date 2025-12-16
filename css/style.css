@@ -58,12 +58,12 @@ figure figcaption {
     margin-top: 0.5rem;
 }
 
-.slider img {
+img-comparison-slider img {
     cursor: auto;
     margin: 0;
 }
 
-.slider:focus {
+img-comparison-slider:focus {
     outline: none;
 }
 
