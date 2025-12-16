@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Technical breakdown of an implementation of 
+    the terrain scan effect from 'Death Stranding' in Unreal Engine 5." />
   <title>Death Stranding Terrain Scan in UE5</title>
   <link rel="stylesheet" 
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap">
@@ -49,7 +51,7 @@
         
         <figure>
           <img src="../assets/terrain_scan/images/mf_screentoworld.png" 
-               alt="ScreenToWorldPosition script" data-zoomable />
+               alt="ScreenToWorldPosition script" data-zoomable loading="lazy" />
           <figcaption>
             Material function script for calculating the world position of a pixel. 
           </figcaption>
@@ -64,7 +66,7 @@
         
         <figure>
           <img src="../assets/terrain_scan/images/m_sobel.png"
-               alt="Sobel filter" data-zoomable />
+               alt="Sobel filter" data-zoomable loading="lazy" />
           <figcaption>
             Material nodes calculating distances for the Sobel operator. This operation is repeated 
             with different screen UV coordinates for each of the four neighbouring pixel.
@@ -74,7 +76,7 @@
         <p>The resulting effect mask looks like this (with the addition of angle and distance variations):</p>
         
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/LS_ScanMaskSequence.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -90,8 +92,8 @@
         
         <figure>
           <img src="../assets/terrain_scan/images/m_final.png"
-               alt="Scan lines final compositing" data-zoomable />
-          <video data-zoomable autoplay loop muted>
+               alt="Scan lines final compositing" data-zoomable loading="lazy" />
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/LS_EffectCompositing.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -116,7 +118,7 @@
         </p>
 
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/scan_showreel.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -164,7 +166,7 @@
         </p>
         
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/depth_visualizationv2.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -183,9 +185,9 @@
         <figure>
           <div id="container1">
             <img src="../assets/terrain_scan/images/icons_terrainview.png" 
-                 alt="Icons / normal map comparison" data-zoomable />
+                 alt="Icons / normal map comparison" data-zoomable loading="lazy" />
             <img src="../assets/terrain_scan/images/icons_normalview.png"
-                 alt="Icons / normal map comparison" data-zoomable />
+                 alt="Icons / normal map comparison" data-zoomable loading="lazy" />
           </div>
           <figcaption>
             Comparison between terrain icon distribution and normal map. Normals perpendicular to the terrain 
@@ -200,7 +202,7 @@
         </p>
 
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/opacity_animation.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -223,7 +225,7 @@
         </p>
 
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/stencils.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -240,7 +242,7 @@
         </p>
 
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/icons_showreel.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -248,12 +250,14 @@
           </figcaption>
         </figure>
         
-        As we did for the scan lines effect, we omit most of the internal logic of the Niagara system for brevity. To leave
-        a general rundown of its steps, below the overview of the particle system.
+        <p>
+          As we did for the scan lines effect, we omit most of the internal logic of the Niagara system for brevity. To leave
+          a general rundown of its steps, below the overview of the particle system.
+        </p>
         
         <figure>
           <img src="../assets/terrain_scan/images/particle.png"
-               alt="Icons particle system overview" data-zoomable />
+               alt="Icons particle system overview" data-zoomable loading="lazy" />
           <figcaption>
             Icons particle system overview.
           </figcaption>
@@ -277,7 +281,7 @@
         </p>
 
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/footprints.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -292,7 +296,7 @@
         </p>
 
         <figure>
-          <video data-zoomable autoplay loop muted>
+          <video data-zoomable autoplay loop muted preload="metadata">
             <source src="../assets/terrain_scan/videos/footprints_highlight.mp4" type="video/mp4">
           </video>
           <figcaption>
@@ -387,6 +391,5 @@
       document.addEventListener('keydown', onKey);
     });
   </script>
-
 </body>
 </html>
