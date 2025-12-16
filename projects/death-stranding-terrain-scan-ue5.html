@@ -22,7 +22,7 @@
       </header>
       
       <div>
-        <h2>Terrain scan lines</h2>
+        <h2>Part I: terrain scan lines</h2>
     
         <p>
           The bulk of the effect consists of the scan wave cone, which sweeps through terrain obstacles 
@@ -33,7 +33,7 @@
         </p>
     
         <p>
-          To make each scan line outline the terrain geometry, we rely on a standard Sobel operator, 
+          To make each scan line outline the terrain geometry, we rely on a standard <b>Sobel operator</b>, 
           most commonly used in edge detection problems. Essentially, scene depth is sampled at a given pixel 
           and at each of its neighbours, and the differences between values are summed. A large sum indicates 
           an edge pixel (see <a href="https://www.vertexfragment.com/ramblings/unity-postprocessing-sobel-outline/" 
@@ -61,7 +61,7 @@
         </figure>
         
         <p>
-          As shown in the image, Unreal's Custom Depth buffer was used to handle translucent surfaces
+          As shown in the image, Unreal's <b>custom depth buffer</b> was used to handle translucent surfaces
           (like water bodies). Translucent materials do not normally write to the depth buffer; 
           that would cause the scanner to unintendedly outline underwater terrain instead of the water surface. 
           If a closer custom depth value is found, it is given priority.
@@ -141,7 +141,7 @@
           or no antialiasing at all.
         </p>
     
-        <h2>Terrain icons</h2>
+        <h2>Part II: Terrain icons</h2>
     
         <p>
           In <i>Death Stranding</i>, the scan casts a set of icons which hover on the terrain for a time, 
@@ -161,7 +161,7 @@
         </p>
         
         <p>
-          A better, more general approach was achieved using scene capture components, which are specialized cameras 
+          A better, more general approach was achieved using <b>scene capture</b> components, which are specialized cameras 
           that can "photograph" a certain scene buffer from their view frustum; when the scan starts, an orthographic 
           camera is set in front of the player looking down the terrain, and saves depth information into a render target texture. 
           Each particle can then sample the texture at its location projected on the texture UV space, and compute 
@@ -225,8 +225,8 @@
         
         <p>
           Other types of terrain can also be scanned. For example, rocky surfaces, bodies of water and trails each employ 
-          a special type of icon. To implement these, we leverage Unreal's Custom Stencil buffer, part of the Custom
-          Depth pass we introduce in the previous section. A stencil is a single byte representing an object id, 
+          a special type of icon. To implement these, we leverage Unreal's <b>custom stencil buffer</b>, part of the custom
+          depth pass we introduce in the previous section. A stencil is a single byte representing an object id, 
           meaning we can represent up to 256 different type of objects; more than sufficient for our terrain 
           types. 
         </p>
@@ -272,11 +272,11 @@
           <img src="../assets/terrain_scan/images/particle.png"
                alt="Icons particle system overview" data-zoomable loading="lazy" />
           <figcaption>
-            Icons particle system overview.
+            Icons particle system overview in the Niagara editor.
           </figcaption>
         </figure>
-    
-        <h2>Footsteps</h2>
+      
+        <h2>Part III: footsteps</h2>
     
         <p>
           The last feature of the effect is the footstep system. In <i>Death Stranding</i>, as the player character walks, 
@@ -286,9 +286,9 @@
         </p>
         
         <p>
-          Footprint spawning is managed via animation notifies, which allow specific animation keyframes to trigger 
+          Footprint spawning is managed via <b>animation notifies</b>, which allow specific animation keyframes to trigger 
           gameplay events. When a footstep event occurs, a downward raycast tries to hit a ground surface and, 
-          if successful, a footprint decal is spawned at that position. Usage of decals ensures accurate projection of 
+          if successful, a <b>footprint decal</b> is spawned at that position. Usage of decals ensures accurate projection of 
           the footprint regardless of terrain conformation. As their lifetime expires, the footprints start to fade 
           and then despawn.
         </p>
