@@ -10,8 +10,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap">
   <link rel="stylesheet" 
         href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/twentytwenty.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/twentytwenty.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
 </head>
 <body>
@@ -53,7 +53,7 @@
         </p>
         
         <figure>
-          <img src="../assets/terrain_scan/images/mf_screentoworld.png" 
+          <img src="assets/images/mf_screentoworld.png" 
                alt="ScreenToWorldPosition script" data-zoomable loading="lazy" />
           <figcaption>
             Material function script for calculating the world position of a pixel. 
@@ -68,7 +68,7 @@
         </p>
         
         <figure>
-          <img src="../assets/terrain_scan/images/m_sobel.png"
+          <img src="assets/images/m_sobel.png"
                alt="Sobel filter" data-zoomable loading="lazy" />
           <figcaption>
             Material nodes calculating distances for the Sobel operator. This operation is repeated 
@@ -80,7 +80,7 @@
         
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/LS_ScanMaskSequence.mp4" type="video/mp4">
+            <source src="assets/videos/LS_ScanMaskSequence.mp4" type="video/mp4">
           </video>
           <figcaption>
             Sobel outline visualization. Restricted along the distance and an angle, it forms the basis
@@ -94,10 +94,10 @@
         </p>
         
         <figure>
-          <img src="../assets/terrain_scan/images/m_final.png"
+          <img src="assets/images/m_final.png"
                alt="Scan lines final compositing" data-zoomable loading="lazy" />
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/LS_EffectCompositing.mp4" type="video/mp4">
+            <source src="assets/videos/LS_EffectCompositing.mp4" type="video/mp4">
           </video>
           <figcaption>
             Final effect compositing. Above, the node graph section; below, its corresponding effect on the material.
@@ -122,7 +122,7 @@
 
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/scan_showreel.mp4" type="video/mp4">
+            <source src="assets/videos/scan_showreel.mp4" type="video/mp4">
           </video>
           <figcaption>
             The final scan lines effect.
@@ -170,7 +170,7 @@
         
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/depth_visualizationv2.mp4" type="video/mp4">
+            <source src="assets/videos/depth_visualizationv2.mp4" type="video/mp4">
           </video>
           <figcaption>
             Depth capture visualization. The SceneCapture component's view frustum is displayed as an orange box. Depth
@@ -186,20 +186,12 @@
         </p>
         
         <figure>
-          <!--
-          <div id="container1">
-            <img src="../assets/terrain_scan/images/icons_terrainview.png" 
-                 alt="Icons / normal map comparison" data-zoomable loading="lazy" />
-            <img src="../assets/terrain_scan/images/icons_normalview.png"
-                 alt="Icons / normal map comparison" data-zoomable loading="lazy" />
-          </div>
-          -->
           <img-comparison-slider>
             <img slot="first"
-                 src="../assets/terrain_scan/images/icons_terrainview.png"
+                 src="assets/images/icons_terrainview.png"
                  alt="Comparison: icons" />
             <img slot="second"
-                 src="../assets/terrain_scan/images/icons_normalview.png"
+                 src="assets/images/icons_normalview.png"
                  alt="Comparison: normal map" />
           </img-comparison-slider>
           <figcaption>
@@ -216,7 +208,7 @@
 
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/opacity_animation.mp4" type="video/mp4">
+            <source src="assets/videos/opacity_animation.mp4" type="video/mp4">
           </video>
           <figcaption>
             Animation of the grid of icons, showing the pulsing effect and icon oscillation.
@@ -239,7 +231,7 @@
 
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/stencils.mp4" type="video/mp4">
+            <source src="assets/videos/stencils.mp4" type="video/mp4">
           </video>
           <figcaption>
             Visualization of stencils from the custom depth buffer, and corresponding icon spawn.
@@ -256,7 +248,7 @@
 
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/icons_showreel.mp4" type="video/mp4">
+            <source src="assets/videos/icons_showreel.mp4" type="video/mp4">
           </video>
           <figcaption>
             The final scanner effect, with inclusion of terrain icons.
@@ -269,7 +261,7 @@
         </p>
         
         <figure>
-          <img src="../assets/terrain_scan/images/particle.png"
+          <img src="assets/images/particle.png"
                alt="Icons particle system overview" data-zoomable loading="lazy" />
           <figcaption>
             Icons particle system overview in the Niagara editor.
@@ -295,7 +287,7 @@
 
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/footprints.mp4" type="video/mp4">
+            <source src="assets/videos/footprints.mp4" type="video/mp4">
           </video>
           <figcaption>
             Footprint placement. Each decal fades autonomously according to its own lifetime.
@@ -310,7 +302,7 @@
 
         <figure>
           <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="../assets/terrain_scan/videos/footprints_highlight.mp4" type="video/mp4">
+            <source src="assets/videos/footprints_highlight.mp4" type="video/mp4">
           </video>
           <figcaption>
             Footprint highlighting and fading.
@@ -347,8 +339,8 @@
   <script src="https://code.jquery.com/jquery-3.7.1.js" 
           integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" 
           crossorigin="anonymous"></script>
-  <script src="../js/jquery.event.move.js"></script>
-  <script src="../js/jquery.twentytwenty.js"></script>
+  <script src="js/jquery.event.move.js"></script>
+  <script src="js/jquery.twentytwenty.js"></script>
 
   <script>
     $(window).on("load", function() {
