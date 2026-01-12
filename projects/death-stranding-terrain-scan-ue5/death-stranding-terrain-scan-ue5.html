@@ -10,6 +10,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap">
   <link rel="stylesheet" 
         href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
+  <link rel="stylesheet" href="../../css/common.css">
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/twentytwenty.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
@@ -116,7 +117,7 @@
           as a constant value or a linearly growing function. The complete code can be checked out at the 
           <a href="https://github.com/lgabellini1/UE5-Death-Stranding-Terrain-Scan" 
              target="_blank" rel="noopener noreferrer">
-            project's GitHub repository.\
+            project's GitHub repository.
           </a>
         </p>
 
@@ -309,7 +310,36 @@
           </figcaption>
         </figure>
     
-        <h2>Conclusions</h2>
+        <h2>Performance considerations and conclusions</h2>
+
+        <p>
+          Building the scan effect as a post-process shader means	that the effect depends on resolution only from a
+          cost perspective (as the post-process pass takes just the GBuffer for input and not any 3D mesh).
+          The effect thus has constant performance, and does not perform worse on scenes with more complex geometry or
+          vice versa.
+        </p>
+        
+        <figure>
+          <img src="assets/images/perf-1.png" 
+               alt="Average GPU cost of the post-process shader.">
+        </figure>
+
+        <p>
+          This infographic (from Unreal Insights) shows that the post-process shader takes on average 0.16ms on the GPU,
+          which accounts for about 0.5% of the frame budget at 30 FPS (the framerate at which this data was retrieved).
+          Cost on the game thread is negligible.
+        </p>
+        
+        <figure>
+          <img src="assets/images/perf-2.png" alt="Game-thread cost of a scan trigger.">
+        </figure>
+
+        <p>
+          The particle system takes a whole 1.26 ms off a frame on activation (meaning, on the frame the player input
+          is processed). This relatively large value can be explained by the fact that, currently, the whole system
+          is re-initialized from the start. I'm sure it could be improved by keeping at least part of the system always
+          initialized and let code operate just on particle lifecycle.
+        </p>
     
         <p>
           Although we've covered most of the effect features present in the original game, there's still room for improvement:
@@ -318,7 +348,7 @@
           <li>
             We relied on manually placed bounding box actors to target special icon areas. This approach is pretty much unfeasible
             on large, open-world maps: I'd guess <i>Death Stranding</i> uses some kind of method to generate these automatically
-            for its environments. This is of course much beyond the scope of this demo project.
+            for its environments. This is of course much beyond the scope of a demo project such as this.
           </li>
           <li>
             Reduce aliasing on the scan lines, which currently appear quite blocky especially from specific camera angles; a possible
