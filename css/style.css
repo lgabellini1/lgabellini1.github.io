@@ -59,6 +59,7 @@ ul{
 .project-list {
     display: flex;
     flex-direction: column;
+    gap: 4rem;
 }
 
 .project-entry {
@@ -86,6 +87,15 @@ ul{
 
 .project-entry:hover img {
     transform: scale(0.97) translateX(-4px);
+}
+
+.project-wip {
+    font-size: 2.5rem;
+    color: #444444;
+    
+    width: 25%;
+    align-self: center;
+    text-align: center;
 }
 
 h3 {
