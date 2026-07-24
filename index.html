@@ -3,68 +3,338 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luca Gabellini | Portfolio</title>
-  <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/style.css">
+  <title>Luca Gabellini</title>
+  <link rel="stylesheet" href="/css/commons.css">
+  <link rel="stylesheet" href="/css/tailwind-utilities.css">
+  <link rel="stylesheet" 
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=arrow_right_alt" />
 </head>
-<body>
-<header>
-  <h1>Luca Gabellini</h1>
-  <div>Software developer</div>
-</header>
-<main>
-  <section>
-    <h2>Projects</h2>
-    <ul class="project-list">
-      <li>
-        <div class="project-entry">
-          <div class="project-wip">
-            <b>W. I. P.</b>
-          </div>
-          <div>
-            <h3><i>"Breath of the Wild"</i>-like cel shading</h3>
-            <div class="project-summary">
-              Extending the Unreal Engine 5 source code with a custom shading model, emulating
-              the cel shading effect seen in "The Legend of Zelda: Breath of the Wild" (2017).
-            </div>
-          </div>
+<!--
+<body class="bg-zinc-900 text-gray-400">
+  <header class="flex flex-col items-center gap-1.5 my-4">
+    <h1 class="text-5xl text-white">Luca Gabellini</h1>
+    <div class="text-lg">Software developer | Portfolio page</div>
+  </header>
+  <main>
+    <section class="flex flex-col p-8">
+      <h2 class="text-4xl bg-white text-zinc-900 p-1 self-center mb-6">
+        Projects
+      </h2>
+      <div class="flex flex-col gap-16 p-2">
+        <div class="flex flex-col gap-6">
+          <span class="text-4xl font-mono text-zinc-700">
+            2026
+          </span>
+          <ul class="flex flex-col gap-16 max-w-4/5 list-none p-6">
+            <li>
+              <a href="">
+                <div class="flex flex-row gap-5">
+                  <div class="text-5xl text-gray-400 max-w-1/4 self-center text-center text-nowrap">
+                    W. I. P.
+                  </div>
+                  <div>
+                    <h3 class="text-2xl text-white">Cel shading</h3>
+                    <div class="text-sm">
+                      Extending the Unreal Engine 5 source code with a custom shading model, emulating
+                      the cel shading effect seen in <i>"The Legend of Zelda: Breath of the Wild"</i> (2017).
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/projects/custom-grass-ue5/custom-grass-ue5.html">
+                <div class="flex flex-row gap-5">
+                    <img src="/assets/preview/..." alt="custom grass - preview image"
+                         class="max-w-1/4 self-center">
+                    <div>
+                      <h3 class="text-2xl text-white">Custom procedural grass</h3>
+                      <div class="text-sm">
+                        A plugin for custom, procedural grass rendering in Unreal Engine 5.
+                        <div class="mt-1 text-xs">
+                          <i>
+                            shader programming, multithreading, GPU programming
+                          </i>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </a>
+            </li>
+          </ul>
         </div>
-      </li>
-      <li>
-        <a class="project-entry" href="projects/death-stranding-terrain-scan-ue5/death-stranding-terrain-scan-ue5.html">
-          <img src="assets/ds-terrain-scan-preview.png" alt="Preview image">
-          <div>
-            <h3>Terrain Scan  ( from <i>"Death Stranding"</i> )</h3>
-            <div class="project-summary">
-              A gameplay implementation of the terrain scan mechanic from the game <i>"Death Stranding"</i> (2019) 
-              in the Unreal Engine 5. 
-              <p class="keywords">Keywords: gameplay programming, shader programming, VFX</p>
+        <div class="flex flex-col">
+          <span class="text-4xl">
+            2025
+          </span>
+          <ul class="flex flex-col gap-16 max-w-4/5 list-none">
+            <li class="ml-16">
+              <a class="project-entry flex flex-row gap-5 items-start"
+                 href="/projects/death-stranding-terrain-scan-ue5/death-stranding-terrain-scan-ue5.html">
+                <img src="/assets/previews/ds-terrain-scan-preview.png" alt="Terrain scan: preview image"
+                     class="w-1/4">
+                <div>
+                  <h3 class="text-2xl text-white">Terrain Scan  ( from <i>"Death Stranding"</i> )</h3>
+                  <div class="text-sm">
+                    A gameplay implementation of the terrain scan mechanic from the game <i>"Death Stranding"</i> (2019)
+                    in Unreal Engine 5.
+                    <div class="mt-1 text-xs">
+                      <i>gameplay programming, shader programming, VFX</i>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="flex flex-row justify-between p-4 text-xs border-t border-gray-400">
+    <div class="flex flex-row items-center gap-2">
+      <span class="flex flex-row items-center gap-0.5">
+        <i>Contact info</i>:
+      </span>
+      <span class="flex flex-row items-center gap-2.5">
+        <a href="mailto:lgabellini@gmail.com">lgabellini1@gmail.com</a>
+        <span>·</span>
+        <span>
+          <a href="https://github.com/lgabellini1">
+            <div class="flex flex-row items-center gap-1.5 ml-0.5">
+              <img src="/assets/github-mark-white.svg" alt="GitHub Logo" width="20" height="20">
+              <span>GitHub page</span>
             </div>
-          </div>
+          </a>
+        </span>
+      </span>
+    </div>
+  </footer>
+  <footer class="bg-zinc-950 text-gray-500 border-t-8 border-t-zinc-800 p-4 text-sm font-mono font-bold">
+    <div class="mx-4 flex flex-row justify-between">
+      <span class="flex flex-row items-center gap-1">
+        <i>Contact info:</i>
+        <a href="mailto:lgabellini1@gmail.com" 
+           class="underline decoration-dotted decoration-gray-400 text-white tracking-wide px-1 
+           hover:bg-white hover:text-black">
+          lgabellini1@gmail.com
         </a>
+      </span>
+      <div>
+        Luca Gabellini © 2026
+      </div>
+    </div>
+  </footer>
+</body>
+-->
+<body class="bg-zinc-900 text-zinc-400 flex flex-col">
+  <header class="px-8 py-12 text-center">
+    <div class="">
+      <h1 class="text-5xl font-bold text-white tracking-tight font-mono">
+        Luca Gabellini
+      </h1>
+      <div class="text-sm font-mono uppercase tracking-[0.3em] text-zinc-500 mt-3">
+        Software developer | Portfolio
+      </div>
+    </div>
+  </header>
+  <main class="flex flex-col items-center">
+    <div class="self-center">
+      <h2 class="text-4xl font-semibold text-white tracking-tight">
+        Projects
+      </h2>
+      <div class="w-16 h-0.5 bg-zinc-600 mt-3 mx-auto"></div>
+    </div>
+    <ul class="list-none"> <!-- Years -->
+      <li class="p-8">
+        <h3 class="font-mono text-4xl text-zinc-700 tracking-widest 
+        border-b border-zinc-800 pb-2 mb-4">
+          2026
+        </h3>
+        <ul class="list-none p-4"> <!-- Projects -->
+          <li class="p-5 rounded-lg transition-colors duration-200 hover:bg-zinc-800/40 relative
+          md:flex md:flex-row md:gap-6 mb-8 opacity-30">
+            <div class="absolute inset-0 -z-10 rounded md:relative md:z-auto md:max-w-1/5 md:w-full md:h-auto md:overflow-hidden 
+            flex items-center justify-center
+            bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_10px,transparent_10px,transparent_20px)]" >
+              <span class="text-xs font-mono uppercase tracking-[0.2em] text-zinc-500 invisible md:visible">
+                Work in progress
+              </span>
+            </div>
+            <div class="flex flex-col w-full gap-4 md:max-w-1/2">
+              <div>
+                <div class="flex flex-row items-center justify-between">
+                  <h4 class="text-zinc-200 text-2xl font-extrabold tracking-tighter">
+                    Cel shading
+                  </h4>
+                  <a href="" target="_blank" rel="noopener noreferrer" class="invisible inline-flex items-center">
+                    <img src="/assets/github-mark-white.svg" alt="Cel shading: GitHub page"
+                         class="h-[25px] w-[25px] md:h-[30px] md:w-[30px] opacity-20 transition-opacity hover:opacity-100 ease-out duration-200">
+                  </a>
+                </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <p>
+                  Extending the Unreal Engine 5 source code with a custom shading model, emulating
+                  the cel shading effect seen in <i>"The Legend of Zelda: Breath of the Wild"</i> (2017).
+                </p>
+                <span class="hidden text-sm text-zinc-500 transition-colors duration-200 mt-4 md:mt-0">
+                  <a href=""
+                     aria-label="Read article: custom procedural grass"
+                     class="inline-flex items-center group/grass-article hover:text-white">
+                    Read more
+                    <span class="material-symbols-outlined transition-transform duration-200 
+                    group-hover/grass-article:translate-x-1">
+                      arrow_right_alt
+                    </span>  
+                  </a>
+                </span>
+              </div>
+            </div>
+          </li>
+          <li class="p-5 rounded-lg transition-colors duration-200 hover:bg-zinc-800/40 relative
+          md:flex md:flex-row md:gap-6">
+            <div class="absolute inset-0 -z-10 rounded md:relative md:z-auto md:max-w-1/5 md:w-full md:h-auto md:overflow-hidden">
+              <img src="/assets/previews/grass-preview.png" alt="Custom procedural grass: preview image"
+                   class="w-full h-full md:h-auto object-cover 
+                   opacity-50 md:opacity-100 md:shadow-md md:transition-transform md:duration-200">
+              <div class="absolute inset-0 bg-zinc-900/80 md:hidden"></div>
+              <div class="absolute inset-0 hidden md:block"
+                   style="background: linear-gradient(135deg, transparent 90%, rgba(24,24,27,0.85) 90%);">
+              </div>
+            </div>
+            <div class="flex flex-col w-full gap-6 md:max-w-1/2">
+              <div>
+                <div class="flex flex-row items-center justify-between">
+                  <h4 class="text-zinc-200 text-2xl font-extrabold tracking-tighter">
+                    Custom procedural grass
+                  </h4>
+                  <a href="https://github.com/lgabellini1/UE5-Custom-Grass-Plugin"
+                     target="_blank" rel="noopener noreferrer" class="inline-flex items-center">
+                    <img src="/assets/github-mark-white.svg" alt="Custom procedural grass: GitHub page"
+                         class="h-[25px] w-[25px] md:h-[30px] md:w-[30px] opacity-20 transition-opacity hover:opacity-100 ease-out duration-200">
+                  </a>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs max-w-5/6 font-mono tracking-wider text-zinc-500 mt-0.5">
+                  <span>graphics programming</span>
+                  <span class="text-zinc-700">·</span>
+                  <span>multithreading</span>
+                  <span class="text-zinc-700">·</span>
+                  <span>compute shaders</span>
+                  <span class="text-zinc-700">·</span>
+                  <span>C++</span>
+                  <span class="text-zinc-700">·</span>
+                  <span>HLSL</span>
+                </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <p>
+                  A plugin for custom, procedural grass rendering and generation in Unreal Engine 5.
+                </p>
+                <span class="text-sm text-zinc-500 transition-colors duration-200 mt-4 md:mt-0">
+                  <a href="/projects/custom-grass-ue5/custom-grass-ue5.html"
+                     aria-label="Read article: custom procedural grass"
+                     class="inline-flex items-center group/grass-article hover:text-white">
+                    Read more
+                    <span class="material-symbols-outlined transition-transform duration-200 
+                    group-hover/grass-article:translate-x-1">
+                      arrow_right_alt
+                    </span>  
+                  </a>
+                </span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </li>
+      <li class="p-8">
+        <h3 class="font-mono text-4xl text-zinc-700 tracking-widest 
+        border-b border-zinc-800 pb-2 mb-4">
+          2025
+        </h3>
+        <ul class="list-none p-3"> <!-- Projects -->
+          <li class="p-5 rounded-lg transition-colors duration-200 hover:bg-zinc-800/40 relative
+          md:flex md:flex-row md:gap-6">
+            <div class="absolute inset-0 -z-10 rounded md:relative md:z-auto md:max-w-1/5 md:w-full md:h-auto md:overflow-hidden">
+              <img src="/assets/previews/ds-terrain-scan-preview.png" alt="Terrain scan: preview image"
+                   class="w-full h-full md:h-auto object-cover 
+                   opacity-90 md:opacity-100 rounded-lg md:rounded-none md:shadow-md md:transition-transform md:duration-200">
+              <div class="absolute inset-0 bg-zinc-900/80 md:hidden"></div>
+              <div class="absolute inset-0 hidden md:block"
+                   style="background: linear-gradient(135deg, transparent 90%, rgba(24,24,27,0.85) 90%);">
+              </div>
+            </div>
+            <div class="flex flex-col w-full gap-6 md:max-w-1/2">
+              <div>
+                <div class="flex flex-row items-center justify-between">
+                  <h4 class="text-zinc-200 text-2xl font-extrabold tracking-tighter">
+                    Terrain scanner
+                  </h4>
+                  <a href="https://github.com/lgabellini1/UE5-Death-Stranding-Terrain-Scan"
+                     target="_blank" rel="noopener noreferrer" class="inline-flex items-center">
+                    <img src="/assets/github-mark-white.svg" alt="Terrain scanner: GitHub page"
+                         class="h-[25px] w-[25px] md:h-[30px] md:w-[30px] opacity-60 md:opacity-20 transition-opacity hover:opacity-100 ease-out duration-200">
+                  </a>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs max-w-5/6 font-mono tracking-wider 
+                text-zinc-400 md:text-zinc-500 mt-0.5">
+                  <span>gameplay programming</span>
+                  <span class="text-zinc-700">·</span>
+                  <span>shader programming</span>
+                  <span class="text-zinc-700 hidden md:inline">·</span>
+                  <span>VFX</span>
+                  <span class="text-zinc-700">·</span>
+                  <span>C++</span>
+                </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <p>
+                  A gameplay implementation of the terrain scan mechanic from the game
+                  <i class="text-zinc-300">"Death Stranding"</i> (2019) in Unreal Engine 5.
+                </p>
+                <span class="text-sm text-zinc-500 transition-colors duration-200 mt-4 md:mt-0">
+                  <a href="/projects/death-stranding-terrain-scan-ue5/death-stranding-terrain-scan-ue5.html"
+                     aria-label="Read article: Terrain scanner"
+                     class="inline-flex items-center group/scanner-article hover:text-white">
+                    Read more
+                    <span class="material-symbols-outlined transition-transform duration-200 
+                    group-hover/scanner-article:translate-x-1">
+                      arrow_right_alt
+                    </span>  
+                  </a>
+                </span>
+              </div>
+            </div>
+          </li>
+        </ul>
       </li>
     </ul>
-  </section>
-</main>
-<footer>
-  <div class="footer-links">
-    <span>
-      Contact info:
-      <a href="mailto:lgabellini@gmail.com">lgabellini1@gmail.com</a>
-    </span>
-    <span class="sep">·</span>
-    <span>
-      <a href="https://github.com/lgabellini1">
-        <div class="github-link">
-          <img src="assets/github-mark-white.svg" alt="GitHub Logo" width="20" height="20">
-          <p>GitHub page</p>
+  </main>
+  <footer class="border-t border-zinc-800 bg-[#18181b] py-6 px-6 mt-20 flex flex-col text-sm">
+    <div class="md:self-end flex flex-col gap-4 ml-2 md:mr-10">
+      <span class="text-zinc-500 font-mono uppercase tracking-[0.2em] text-xs">
+      Contact
+      </span>
+      <div class="flex flex-col gap-3 tracking-tight text-zinc-300 md:text-zinc-300/70">
+        <a href="mailto:lgabellini1@gmail.com" class="transition-colors duration-200 hover:text-zinc-300">
+          lgabellini1@gmail.com
+        </a>
+        <a href="tel:+393453597147" class="transition-colors duration-200 hover:text-zinc-300">
+          +39 345 359 7147
+        </a>
+        <div class="flex items-center gap-6 mt-1">
+          <a href="https://github.com/lgabellini1/"
+             target="_blank" rel="noopener noreferrer"
+             class="inline-flex items-center opacity-100 md:opacity-50 md:hover:opacity-100 transition-opacity duration-200">
+            <img src="/assets/github-mark-white.svg" alt="GitHub page" class="h-6 w-6">
+          </a>
+          <a href="https://www.linkedin.com/in/luca-gabellini-137bb2299/"
+             target="_blank" rel="noopener noreferrer"
+             class="inline-flex items-center opacity-100 md:opacity-50 md:hover:opacity-100 transition-opacity duration-200">
+            <img src="/assets/linkedin-app-white-icon.svg" alt="LinkedIn page" class="h-6 w-6">
+          </a>
         </div>
-      </a>
-    </span>
-  </div>
-  <div>
-    Luca Gabellini ©2025
-  </div>
-</footer>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

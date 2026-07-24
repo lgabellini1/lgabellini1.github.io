@@ -1,0 +1,74 @@
+﻿/* General paragraph style */
+
+p, ol, ul {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+ol, ul {
+    margin-left: 2rem;
+}
+
+li {
+    margin-top: 1rem;
+}
+
+hr {
+    border-style: none;
+}
+
+/* Links */
+
+a {
+    text-decoration-line:  underline;
+    text-decoration-style: dotted;
+    text-decoration-color: gray;
+    
+    color: white;
+    
+    padding-left: 2px;
+    padding-right: 2px;
+
+    transition: color 120ms ease, background-color 120ms ease;
+}
+
+a:hover {
+    color: black;
+    background-color: white;
+    text-decoration: none;
+}
+
+@layer base {
+    /* href click animation inside the document */
+
+    :where(.highlighted) {
+        animation: highlight 2.5s ease forwards;
+    }
+
+    :where(.highlighted:hover) {
+        animation: none;
+        background-color: white;
+        transition: none;
+    }
+
+    :where(:target:hover) {
+        background-color: white;
+    }
+    
+    @keyframes highlight {
+        0%   { background-color: var(--color-zinc-700); }
+        60%  { background-color: var(--color-zinc-700); }
+        100% { background-color: transparent; }
+    }
+}
+
+/* Others */
+
+code {
+    font-family: var(--font-mono), monospace;
+}
+
+b {
+    font-weight: bold;
+    color: var(--color-zinc-300);
+}

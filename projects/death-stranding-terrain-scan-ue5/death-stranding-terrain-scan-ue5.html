@@ -1,38 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Technical breakdown of an implementation of 
-    the terrain scan effect from 'Death Stranding' in Unreal Engine 5." />
+    the terrain scan effect from 'Death Stranding' in Unreal Engine 5.">
   <title>Death Stranding Terrain Scan in UE5</title>
-  <link rel="stylesheet" 
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@400;700&display=swap">
-  <link rel="stylesheet" 
-        href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
-  <link rel="stylesheet" href="../../css/common.css">
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/twentytwenty.css" />
+  <link rel="stylesheet" href="/css/commons.css">
+  <link rel="stylesheet" href="/css/project-commons.css">
+  <link rel="stylesheet" href="/css/tailwind-utilities.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
+  <link rel="stylesheet" href="/css/twentytwenty.css" />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_back"/>
+  <script defer src="/js/project-commons.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
 </head>
 <body>
   <main>
-    <article>
-      <header>
-        <h1>Death Stranding Terrain Scan in Unreal Engine 5</h1>
+    <article class="bg-zinc-900 text-gray-400 px-8 py-4 flex flex-col items-center">
+      <div class="floating-btn absolute right-8">
+        <a href="#" class="font-mono tracking-wide text-sm">
+          Back to top
+        </a>
+      </div>
+      <header class="self-start p-4 flex flex-row items-start justify-between w-full">
+        <h1 class="flex flex-col gap-2.5 mb-8 max-w-5xl text-white text-5xl font-semibold">
+          <span class="tracking-wide">Terrain Scan (from <i>Death Stranding</i>)</span>
+          <span class="font-light text-4xl ml-16 tracking-wider">in</span>
+          <span class="tracking-wide">Unreal Engine 5</span>
+        </h1>
+        <a class="!no-underline mt-1" href="">
+          <div class="flex flex-row items-center gap-1">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span class="tracking-wider">TO MAIN PAGE</span>
+            <span></span>
+          </div>
+        </a>
       </header>
-      
-      <div>
-        <h2>Part I: terrain scan lines</h2>
-    
-        <p>
+      <div class="max-w-4xl">
+        <hr class="h-px bg-zinc-800"/>
+        <ul class="list-disc">
+          <li>
+            <a href="#part-I">Part I: Terrain Scan Lines</a>
+          </li>
+          <li>
+            <a href="#part-II">Part II: Terrain Icons</a>
+          </li>
+          <li>
+            <a href="#part-III">Part III: Footsteps</a>
+          </li>
+          <li>
+            <a href="#conclusion">Performance and conclusions</a>
+          </li>
+        </ul>
+        <hr class="h-px bg-zinc-800" id="part-I"/>
+        <h2 class="mt-10 mb-4 text-white text-4xl font-semibold">
+          Part I: Terrain Scan Lines
+        </h2>
+        <p class="first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
           The bulk of the effect consists of the scan wave cone, which sweeps through terrain obstacles 
           and vegetation into the far distance. This is achieved by means of a single, unbounded post-process 
-          volume placed in the world map; a post-process material shader is then associated with this volume. 
+          volume placed in the world map; a <b>post-process material</b> shader is then associated with this volume. 
           To allow the effect to change its appearance dynamically, the material is bound to a Material Parameter 
           Collection (MPC), enabling the shader to be updated from gameplay code without need for a recompilation.
         </p>
-    
+        <hr class="h-px bg-zinc-800"/>
         <p>
           To make each scan line outline the terrain geometry, we rely on a standard <b>Sobel operator</b>, 
           most commonly used in edge detection problems. Essentially, scene depth is sampled at a given pixel 
@@ -41,7 +74,6 @@
                                   target="_blank" rel="noopener noreferrer">this article</a>
           for a more detailed explanation in the context of the Unity post-processing pipeline).
         </p>
-    
         <p>
           The issue with a standard depth-based Sobel filter is that, since scene depth buffer values are 
           camera-dependent, the scan lines get recalculated every time the camera moves. Therefore, need arose 
@@ -52,67 +84,74 @@
           nodes (like the "raw", non-linearized depth buffer, named DeviceZ and transformation matrices from the uniform
           view buffer).
         </p>
-        
-        <figure>
-          <img src="assets/images/mf_screentoworld.png" 
-               alt="ScreenToWorldPosition script" data-zoomable loading="lazy" />
-          <figcaption>
-            Material function script for calculating the world position of a pixel. 
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/images/mf_screentoworld.png" class="max-w-3xl w-full"
+                 alt="ScreenToWorldPosition script" data-zoomable loading="lazy" />
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            1.1 — Material function script for calculating the world position of a pixel. 
           </figcaption>
         </figure>
-        
         <p>
           As shown in the image, Unreal's <b>custom depth buffer</b> was used to handle translucent surfaces
           (like water bodies). Translucent materials do not normally write to the depth buffer; 
           that would cause the scanner to unintendedly outline underwater terrain instead of the water surface. 
           If a closer custom depth value is found, it is given priority.
         </p>
-        
-        <figure>
-          <img src="assets/images/m_sobel.png"
-               alt="Sobel filter" data-zoomable loading="lazy" />
-          <figcaption>
-            Material nodes calculating distances for the Sobel operator. This operation is repeated 
+        <hr class="h-px bg-zinc-800"/>
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/images/m_sobel.png" class="max-w-3xl w-full"
+                 alt="Sobel filter" data-zoomable loading="lazy" />
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            1.2 — Material nodes calculating distances for the Sobel operator. This operation is repeated 
             with different screen UV coordinates for each of the four neighbouring pixel.
           </figcaption>
         </figure>
-    
-        <p>The resulting effect mask looks like this (with the addition of angle and distance variations):</p>
-        
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/LS_ScanMaskSequence.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            Sobel outline visualization. Restricted along the distance and an angle, it forms the basis
+        <p>
+          The resulting effect mask looks like this (with the addition of angle and distance variations):
+        </p>
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-xl w-full">
+              <source src="assets/videos/LS_ScanMaskSequence.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            1.3 — Sobel outline visualization. Restricted along the distance and an angle, it forms the basis
             of the scanner effect.
           </figcaption>
         </figure>
-    
+        <hr class="h-px bg-zinc-800"/>
         <p>
           The final visual result is obtained by compositing the mask together with other effects 
           (edge gradient, darkening), and then multiplying the result with the scene's base color.
         </p>
-        
-        <figure>
-          <img src="assets/images/m_final.png"
-               alt="Scan lines final compositing" data-zoomable loading="lazy" />
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/LS_EffectCompositing.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            Final effect compositing. Above, the node graph section; below, its corresponding effect on the material.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/images/m_final.png" class="max-w-4xl w-full"
+                 alt="Scan lines final compositing" data-zoomable loading="lazy" />
+          </div>
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-lg w-full">
+              <source src="assets/videos/LS_EffectCompositing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            1.4 — Final effect compositing. Above, the relative node graph section; below, 
+            its corresponding effect on the material.
           </figcaption>
         </figure>
-
         <p>
           Due to its large size, the full node graph is omitted.
         </p>
-        
+        <hr class="h-px bg-zinc-800"/>
         <p>
-          As mentioned at the beginning of this section, the material animation logic lies in code. To be precise, a
-          ScannerController component (attached to the player) ticks every frame and updates the effect's velocity 
-          (from which the current range is derived) and opacity. 
+          As mentioned at the beginning of this section, the material animation logic is fully programmed in C++. 
+          To be precise, a ScannerController component (attached to the player) ticks every frame and updates the 
+          effect's velocity (from which the current range is derived) and opacity. 
           The scan lives through four different phases, each of which calculates these parameters either
           as a constant value or a linearly growing function. The complete code can be checked out at the 
           <a href="https://github.com/lgabellini1/UE5-Death-Stranding-Terrain-Scan" 
@@ -120,38 +159,39 @@
             project's GitHub repository.
           </a>
         </p>
-
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/scan_showreel.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            The final scan lines effect.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-2xl w-full">
+              <source src="assets/videos/scan_showreel.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            1.5 — The final scan lines effect.
           </figcaption>
         </figure>
-
-        <p class="note">
-          A note on <strong>antialiasing</strong>: the material is not made with TAA (Temporal Anti-Aliasing) in mind. As explained in the
+        <hr class="h-px bg-zinc-800"/>
+        <p class="p-4 mt-6 bg-zinc-800 border-l-4 rounded-md">
+          A note on <b>antialiasing</b>: the material is not made with TAA (Temporal Anti-Aliasing) in mind. As explained in the
           <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/post-process-materials-in-unreal-engine#temporal-anti-aliasing-or-why-the-g-buffer-jitters" 
              target="_blank" rel="noopener noreferrer">
-            official documentation
-          </a>, 
+            official documentation</a>, 
           TAA makes depth-based, post-process effects jitter by 1 pixel. To fix this, one would need to set its Blendable Location before 
           the application of TAA. This could of course be done, but it would require a reworking of the material as it is now 
           to make it look like its intended appearance. As such, the material currently works right with FXAA (Fast Approximate Anti-Aliasing)
           or no antialiasing at all.
         </p>
-    
-        <h2>Part II: Terrain icons</h2>
-    
-        <p>
+        <hr class="h-px bg-zinc-800" id="part-II"/>
+        <h2 class="mt-4 mb-4 text-white text-4xl font-semibold">
+          Part II: Terrain Icons
+        </h2>
+        <p class="first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
           In <i>Death Stranding</i>, the scan casts a set of icons which hover on the terrain for a time, 
           and serve a gameplay purpose by informing the player about terrain steepness and other characteristics 
           (water depth, presence of tall vegetation, etc...). Since several hundred icons must be rendered simultaneously, 
           each with its own position and visual properties, it seemed well-suited to use Niagara 
           (Unreal Engine’s particle system) to implement a compute shader.
         </p>
-    
+        <hr class="h-px bg-zinc-800"/>
         <p>
           A grid of particles is spawned and constrained within the scan angle; each particle represents a single 
           terrain icon. To ensure the icons rest accurately on the terrain surface, we need access to terrain depth. 
@@ -160,7 +200,6 @@
           results on regular static meshes, including Instanced Static Meshes which make a large part of our landscape's 
           rocky formations, but do not actually contribute to its depth.
         </p>
-        
         <p>
           A better, more general approach was achieved using <b>scene capture</b> components, which are specialized cameras 
           that can "photograph" a certain scene buffer from their view frustum; when the scan starts, an orthographic 
@@ -168,54 +207,57 @@
           Each particle can then sample the texture at its location projected on the texture UV space, and compute 
           its height using depth from camera.
         </p>
-        
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/depth_visualizationv2.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            Depth capture visualization. The SceneCapture component's view frustum is displayed as an orange box. Depth
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-2xl w-full">
+              <source src="assets/videos/depth_visualizationv2.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.1 — Depth capture visualization. The SceneCapture component's view frustum is displayed as an orange box. Depth
             values saved in the texture color are seen mirroring the terrain's valleys (in white) and peaks (in black).
           </figcaption>
         </figure>
-        
+        <hr class="h-px bg-zinc-800"/>
         <p>
           An analogous approach is used for recording terrain normals and determine terrain slope. The slope value is then
           used to select the particle's color and a two-dimensional vector of ints, which represent the UV coordinates of
           that type of terrain icon inside a small texture atlas. The material used for the sprites then simply receives the
           data, samples the atlas at the given coordinates and outputs the color as emissive.
         </p>
-        
-        <figure>
-          <img-comparison-slider>
-            <img slot="first"
-                 src="assets/images/icons_terrainview.png"
-                 alt="Comparison: icons" />
-            <img slot="second"
-                 src="assets/images/icons_normalview.png"
-                 alt="Comparison: normal map" />
-          </img-comparison-slider>
-          <figcaption>
-            Comparison between terrain icon distribution and normal map. Normals perpendicular to the terrain 
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img-comparison-slider class="!block !outline-none">
+              <img slot="first" class="max-w-2xl w-full"
+                   src="assets/images/icons_terrainview.png"
+                   alt="Comparison: icons" />
+              <img slot="second" class="max-w-2xl w-full"
+                   src="assets/images/icons_normalview.png"
+                   alt="Comparison: normal map" />
+            </img-comparison-slider>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.2 — Comparison between terrain icon distribution and normal map. Normals perpendicular to the terrain 
             (blueish in the image) yield primarily blue icons.
           </figcaption>
         </figure>
-  
+        <hr class="h-px bg-zinc-800"/>
         <p>
           A sine wave "pushing" through the grid is used to replicate the vertical oscillation of the icons. Together
           with the pulsing opacity animation, which periodically hides and shows back the icons, this forms the core
           animation of the effect.
         </p>
-
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/opacity_animation.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            Animation of the grid of icons, showing the pulsing effect and icon oscillation.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-2xl w-full">
+              <source src="assets/videos/opacity_animation.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.3 — Animation of the grid of icons, showing the pulsing effect and icon oscillation.
           </figcaption>
         </figure>
-        
+        <hr class="h-px bg-zinc-800"/>
         <p>
           Other types of terrain can also be scanned. For example, rocky surfaces, bodies of water and trails each employ 
           a special type of icon. To implement these, we leverage Unreal's <b>custom stencil buffer</b>, part of the custom
@@ -223,22 +265,22 @@
           meaning we can represent up to 256 different type of objects; more than sufficient for our terrain 
           types. 
         </p>
-        
         <p>
           We use therefore special bounding box actors with no collision, which write only to the custom depth buffer 
           and, as such, are not rendered in the final scene. Another scene capture component reads the stencil byte 
           from the buffer at the icon's position: that integer is the terrain type.
         </p>
-
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/stencils.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            Visualization of stencils from the custom depth buffer, and corresponding icon spawn.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-2xl w-full">
+              <source src="assets/videos/stencils.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.4 — Visualization of stencils from the custom depth buffer, and corresponding icon spawn.
           </figcaption>
         </figure>
-        
+        <hr class="h-px bg-zinc-800"/>
         <p>
           Below a showreel of the final particle system behaviour, including additional effects like
           the red flare for icons indicating unwalkable terrain. It is implemented in the emitter 
@@ -246,38 +288,39 @@
           the opacity of the flare and the opacity of the icon is always equal to 1 (as one grows, the
           other fades until it becomes invisible).
         </p>
-
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/icons_showreel.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            The final scanner effect, with inclusion of terrain icons.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-2xl w-full">
+              <source src="assets/videos/icons_showreel.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.5 — The final scanner effect, with inclusion of terrain icons.
           </figcaption>
         </figure>
-        
         <p>
           As we did for the scan lines effect, we omit most of the internal logic of the Niagara system for brevity. To leave
           a general rundown of its steps, below the overview of the particle system.
         </p>
-        
-        <figure>
-          <img src="assets/images/particle.png"
-               alt="Icons particle system overview" data-zoomable loading="lazy" />
-          <figcaption>
-            Icons particle system overview in the Niagara editor.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/images/particle.png" class="max-w-xl w-full"
+                 alt="Icons particle system overview" data-zoomable loading="lazy" />
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.6 — Icons particle system overview in the Niagara editor.
           </figcaption>
         </figure>
-      
-        <h2>Part III: footsteps</h2>
-    
-        <p>
+        <hr class="h-px bg-zinc-800" id="part-III"/>
+        <h2 class="mt-4 mb-4 text-white text-4xl font-semibold">
+          Part III: Footsteps
+        </h2>
+        <p class="first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
           The last feature of the effect is the footstep system. In <i>Death Stranding</i>, as the player character walks, 
           footprints appear on the terrain; when a scan occurs, all the footprints inside the scan area of effect are 
           highlighted in bright blue. Fresh footprints inside the area also get highlighted on walking. When the effect 
           terminates, the brightness starts to gradually fade.
         </p>
-        
         <p>
           Footprint spawning is managed via <b>animation notifies</b>, which allow specific animation keyframes to trigger 
           gameplay events. When a footstep event occurs, a downward raycast tries to hit a ground surface and, 
@@ -285,66 +328,70 @@
           the footprint regardless of terrain conformation. As their lifetime expires, the footprints start to fade 
           and then despawn.
         </p>
-
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/footprints.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            Footprint placement. Each decal fades autonomously according to its own lifetime.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-2xl w-full">
+              <source src="assets/videos/footprints.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            3.1 — Footprint placement. Each decal fades autonomously according to its own lifetime.
           </figcaption>
         </figure>
-        
         <p>
           As both types of footprints (highlighted and non-highlighted) can be present in-game at the same time,
           we need a different material instance for each of them. As all the highlighted fade simultaneously, thus 
           all share the same appearance, a single material is sufficient. 
         </p>
-
-        <figure>
-          <video data-zoomable autoplay loop muted preload="metadata">
-            <source src="assets/videos/footprints_highlight.mp4" type="video/mp4">
-          </video>
-          <figcaption>
-            Footprint highlighting and fading.
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <video data-zoomable autoplay loop muted preload="metadata" class="max-w-2xl w-full">
+              <source src="assets/videos/footprints_highlight.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            3.2 — Footprint highlighting and fading.
           </figcaption>
         </figure>
-    
-        <h2>Performance considerations and conclusions</h2>
-
-        <p>
+        <hr class="h-px bg-zinc-800" id="conclusions"/>
+        <h2 class="mt-4 mb-4 text-white text-4xl font-semibold">
+          Performance and conclusions
+        </h2>
+        <p class="first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
           Building the scan effect as a post-process shader means	that the effect depends on resolution only from a
           cost perspective (as the post-process pass takes just the GBuffer for input and not any 3D mesh).
           The effect thus has constant performance, and does not perform worse on scenes with more complex geometry or
           vice versa.
         </p>
-        
-        <figure>
-          <img src="assets/images/perf-1.png" 
-               alt="Average GPU cost of the post-process shader.">
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/images/perf-1.png" class="max-w-lg w-full"
+                 alt="Average GPU cost of the post-process shader.">
+          </div>
         </figure>
-
         <p>
           This infographic (from Unreal Insights) shows that the post-process shader takes on average 0.16ms on the GPU,
           which accounts for about 0.5% of the frame budget at 30 FPS (the framerate at which this data was retrieved).
           Cost on the game thread is negligible.
         </p>
-        
-        <figure>
-          <img src="assets/images/perf-2.png" alt="Game-thread cost of a scan trigger.">
+        <hr class="h-px bg-zinc-800"/>
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/images/perf-2.png" class="max-w-2xl w-full"
+                 alt="Game-thread cost of a scan trigger.">
+          </div>  
         </figure>
-
         <p>
           The particle system takes a whole 1.26 ms off a frame on activation (meaning, on the frame the player input
           is processed). This relatively large value can be explained by the fact that, currently, the whole system
           is re-initialized from the start. I'm sure it could be improved by keeping at least part of the system always
           initialized and let code operate just on particle lifecycle.
         </p>
-    
+        <hr class="h-px bg-zinc-800"/>
         <p>
           Although we've covered most of the effect features present in the original game, there's still room for improvement:
         </p>
-        <ul>
+        <ul class="list-disc">
           <li>
             We relied on manually placed bounding box actors to target special icon areas. This approach is pretty much unfeasible
             on large, open-world maps: I'd guess <i>Death Stranding</i> uses some kind of method to generate these automatically
@@ -362,16 +409,23 @@
             of the terrain's conformation and correct anomalous values.
           </li>
         </ul>
+        <hr class="h-px bg-zinc-800"/>
       </div>
     </article>
+    <footer class="bg-zinc-950 text-gray-500 border-t-8 border-t-zinc-800 p-4 text-sm font-mono font-bold">
+      <div class="mx-4 flex flex-row justify-between">
+        <div>Footer WIP</div>
+        <div>
+          Luca Gabellini © 2026
+        </div>
+      </div>
+    </footer>
   </main>
-
   <script src="https://code.jquery.com/jquery-3.7.1.js" 
           integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" 
           crossorigin="anonymous"></script>
-  <script src="js/jquery.event.move.js"></script>
-  <script src="js/jquery.twentytwenty.js"></script>
-
+  <script src="/js/jquery.event.move.js"></script>
+  <script src="/js/jquery.twentytwenty.js"></script>
   <script>
     $(window).on("load", function() {
       $("#container1").twentytwenty({
@@ -380,50 +434,6 @@
         before_label: "Final scene",
         after_label: "Normal map"
       });
-    });
-  </script>
-
-  <script>
-    document.addEventListener('click', function(e) {
-      const media = e.target.closest('[data-zoomable]');
-      if (!media) return;
-
-      // Prevent multiple zooms
-      if (document.querySelector('.simple-zoom-overlay')) return;
-
-      // Create overlay
-      const overlay = document.createElement('div');
-      overlay.className = 'simple-zoom-overlay';
-
-      // Clone media
-      const clone = media.cloneNode(true);
-      clone.className = 'simple-zoom-media';
-      clone.removeAttribute('data-zoomable');
-
-      overlay.appendChild(clone);
-      document.body.appendChild(overlay);
-
-      // Disable scrolling
-      document.body.style.overflow = 'hidden';
-
-      // Fade in overlay
-      requestAnimationFrame(() => {
-        overlay.style.opacity = '1';
-      });
-
-      function closeZoom() {
-        overlay.style.opacity = '0';
-        document.body.style.overflow = '';
-        setTimeout(() => overlay.remove(), 250);
-        document.removeEventListener('keydown', onKey);
-      }
-
-      function onKey(e) {
-        if (e.key === 'Escape') closeZoom();
-      }
-
-      overlay.addEventListener('click', closeZoom);
-      document.addEventListener('keydown', onKey);
     });
   </script>
 </body>
