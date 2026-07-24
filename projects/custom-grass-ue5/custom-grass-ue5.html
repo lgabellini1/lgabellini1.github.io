@@ -1,0 +1,1106 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Technical breakdown of an implementation of a custom procedural grass 
+     rendering plugin for Unreal Engine 5.">
+  <title>Custom Procedural Grass for UE5</title>
+  <link rel="stylesheet" href="/css/commons.css">
+  <link rel="stylesheet" href="/css/project-commons.css">
+  <link rel="stylesheet" href="/css/embla.css">
+  <link rel="stylesheet" href="/css/tailwind-utilities.css">
+  <link rel="stylesheet" href="/css/prism.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"/>
+  <link rel="stylesheet" 
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_back"/>
+  <script defer src="/js/project-commons.js"></script>
+  <script defer src="/js/prism.js"></script>
+  <script src="https://unpkg.com/embla-carousel/embla-carousel.umd.js"></script>
+  <script defer src="/js/embla.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
+</head>
+<body>
+  <main>
+    <article class="bg-zinc-900 text-zinc-400 md:text-base text-sm/7 md:flex flex-col items-center md:px-8 px-6 py-4">
+      <div class="floating-btn absolute hidden md:inline right-8">
+        <a href="#" class="font-mono tracking-wide text-sm">
+          Back to top
+        </a>
+      </div>
+      <header class="self-start p-4 flex flex-col md:flex-row-reverse items-start justify-between w-full">
+        <a class="!no-underline mt-1 md:mb-0 mb-8" href="/index.html">
+          <div class="flex flex-row items-center gap-1">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span class="tracking-wider">TO MAIN PAGE</span>
+            <span></span>
+          </div>
+        </a>
+        <h1 class="flex flex-col gap-2.5 mb-4 sm:mb-8 max-w-2xl text-white sm:text-5xl text-4xl font-semibold">
+          <span class="tracking-wide text-[clamp(2rem,5vw,3rem)]">Custom Procedural Grass</span>
+          <span class="block md:hidden font-light text-2xl text-zinc-500 tracking-wider">for Unreal Engine 5</span>
+          <span class="hidden md:block font-light text-zinc-500 sm:text-4xl text-3xl sm:ml-16 ml-8 tracking-wider">for</span>
+          <span class="hidden md:block tracking-wide text-[clamp(2rem,5vw,3rem)]">Unreal Engine 5</span>
+        </h1>
+      </header>
+      <div class="max-w-4xl">
+        <hr class="h-px bg-zinc-800"/>
+        <ul class="list-disc">
+          <li>
+            <a href="#intro">Part I: Intro</a>
+          </li>
+          <li>
+            <a href="#overview">Part II: Overview</a>
+          </li>
+          <li class="list-none">  
+            <ul class="list-disc">
+              <li>
+                <a href="#rs" class="">Render system</a>
+              </li>
+              <li>
+                <a href="#cs" class="">Compute shader</a>
+              </li>
+              <li>
+                <a href="#vs" class="">Mesh and vertex shader</a>
+              </li>
+              <li>
+                <a href="#ps" class="">Pixel shader</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#optimization">Part III: Optimization, performance and conclusions</a>
+          </li>
+          <li>
+            <a href="#src">Sources</a>
+          </li>
+        </ul>
+        <hr class="h-px bg-zinc-800" id="intro"/>
+        <h2 class="mt-10 mb-4 text-white text-3xl md:text-4xl font-semibold">
+          Part I: Intro
+        </h2>
+        <p class="first-letter:text-6xl md:first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
+          The project stems from another (currently work-in-progress), where
+          I required a field of grass for showcase; hence came the idea to implement my own
+          system for grass generation instead of relying on the engine's own tools. 
+        </p>
+        <p>
+          When doing research for references, I came across <a href="#gdc">this</a> very valuable presentation 
+          from <i>Sucker Punch</i>, where they go through a 
+          general rundown of their implementation of a similar system for <i>Ghost of Tsushima</i>. Most 
+          of the work came from turning that general description into an actual implementation, 
+          integrating it into Unreal's rendering pipeline and systems. The entire system is a fully custom solution,
+          meaning it was built up without relying on any existing engine tool (vegetation system, Niagara, etc...).
+          All of this is done without modifying the engine source.
+        </p>
+        <p>
+          The full source code can be found at the project plugin's 
+          <a href="https://github.com/lgabellini1/UE5-Custom-Grass-Plugin">GitHub page</a>.
+        </p>
+        <div class="flex flex-col justify-center items-center">
+          <div class="embla mb-8 mt-4">
+            <div class="embla__viewport">
+              <div class="embla__container">
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/preview0.png" alt="No clumps" data-zoomable>
+                    </div>
+                    <figcaption class="embla__slide-caption">
+                      1.0 — Final effect showcase.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/preview1.png" alt="No clumps" data-zoomable>
+                    </div>                    
+                    <figcaption class="embla__slide-caption">
+                      1.0 — Final effect showcase.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/preview2.png" alt="No clumps" data-zoomable>
+                    </div>                    
+                    <figcaption class="embla__slide-caption">
+                      1.0 — Final effect showcase.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/preview3.png" alt="No clumps" data-zoomable>
+                    </div>
+                    <figcaption class="embla__slide-caption">
+                      1.0 — Final effect showcase.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/preview4.png" alt="No clumps" data-zoomable>
+                    </div>                    
+                    <figcaption class="embla__slide-caption">
+                      1.0 — Final effect showcase.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/preview5.png" alt="No clumps" data-zoomable>
+                    </div>                    
+                    <figcaption class="embla__slide-caption">
+                      1.0 — Final effect showcase.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/preview6.png" alt="No clumps" data-zoomable>
+                    </div>                    
+                    <figcaption class="embla__slide-caption">
+                      1.0 — Final effect showcase.
+                    </figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-center items-center mt-2.5">
+              <p class="embla__caption mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic"></p>
+            </div>
+            <div class="embla__controls md:p-0 px-6 md:justify-between justify-center">
+              <div class="embla__buttons md:flex hidden">
+                <button class="embla__button embla__button--prev embla__button--disabled" type="button">
+                  <svg class="embla__button__svg" viewBox="0 0 532 532">
+                    <path fill="currentColor" d="M355.66 11.354c13.793-13.805 36.208-13.805 50.001 0 13.785 13.804 13.785 36.238 0 50.034L201.22 266l204.442 204.61c13.785 13.805 13.785 36.239 0 50.044-13.793 13.796-36.208 13.796-50.002 0a5994246.277 5994246.277 0 0 0-229.332-229.454 35.065 35.065 0 0 1-10.326-25.126c0-9.2 3.393-18.26 10.326-25.2C172.192 194.973 332.731 34.31 355.66 11.354Z"
+                    ></path>
+                  </svg>
+                </button>
+                <button class="embla__button embla__button--next embla__button--disabled" type="button">
+                  <svg class="embla__button__svg" viewBox="0 0 532 532">
+                    <path fill="currentColor" d="M176.34 520.646c-13.793 13.805-36.208 13.805-50.001 0-13.785-13.804-13.785-36.238 0-50.034L330.78 266 126.34 61.391c-13.785-13.805-13.785-36.239 0-50.044 13.793-13.796 36.208-13.796 50.002 0 22.928 22.947 206.395 206.507 229.332 229.454a35.065 35.065 0 0 1 10.326 25.126c0 9.2-3.393 18.26-10.326 25.2-45.865 45.901-206.404 206.564-229.332 229.52Z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="embla__dots"></div>
+            </div>
+          </div>
+        </div>
+        <hr class="h-px bg-zinc-800" id="overview"/>
+        <h2 class="mt-4 mb-4 text-white text-3xl md:text-4xl font-semibold">
+          Part II: Overview
+        </h2>
+        <p class="first-letter:text-6xl md:first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
+          Near the beginning of the presentation, they mention "chopping" the world terrain into 
+          tiles, with the aim of splitting the generation and rendering of grass into sections, 
+          instead of the whole map at the same time. 
+        </p>    
+        <p>  
+          Unreal already takes care of this for us through its landscape system, where each landscape
+          is made up of several tiles (called "components" in the engine), each of which is rendered and loaded separately. For this reason
+          we have tailored the system to landscapes only: it makes sense as that's the intended system in Unreal
+          for open worlds, which is where you'd possibly want large fields of grass anyway. 
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/tiles.png" alt="Landscape tile subdivision" data-zoomable
+                 class="max-w-full md:w-xl w-sm">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.1 — Visualization of tile subdivision on a simple landscape.
+          </figcaption>
+        </figure>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          Once the terrain subdivision is in place, we can issue this pipeline for each tile:
+        </p>
+        <ul class="list-disc">
+          <li>
+            a <b>compute shader</b>, which generates grass data (position, height, bending, etc...)
+            for the tile and stores it into a buffer;
+          </li>
+          <li>
+            a <b>vertex shader</b>, which reads from the buffer and produces grass blade geometry:
+            we can then use instancing to draw this to the screen in a single call per-tile;
+          </li>
+          <li>
+            a <b>pixel shader</b>.
+          </li>
+        </ul>
+        <p>
+          To put all of these things to work, we had to delve deep into several graphics programming systems of
+          the engine, which will be presented briefly when encountered during the course of this article.
+        </p>
+        <hr class="h-px bg-zinc-800" id="rs"/>
+        <h3 class="mt-4 mb-4 text-white text-xl md:text-2xl font-semibold">
+          Render system
+        </h3>
+        <p>
+          The main tool for writing modern rendering code in Unreal is the 
+          <a href="#rdg"><i>Render Dependency Graph</i></a> (RDG). 
+          It allows describing custom rendering passes at a high-level; later on, the code is compiled in the form of a
+          directed acyclic graph. RDG handles resource management for us, ensuring that they live throughout
+          the graph execution, and proper optimized usage. Scheduling and synchronization are also taken care of by RDG.
+        </p>
+        <p>
+          RDG is a layer over another, low-level rendering code abstraction, called <b>RHI</b> (which is, in turn, a layer
+          over the usual graphics programming APIs like Direct3D, Vulkan, etc...). Usage of RDG is preferred whenever
+          possible, but we'll have to rely on RHI functions for things outside RDG scope.
+        </p>
+        <p>
+          Unreal has a separate <b>render thread</b> (RT) for rendering processes, which runs in parallel with the standard game thread (GT).
+          Writing rendering code requires care typical of multithreaded programming. In its own internal
+          code, Unreal uses proxies (copies) of game-thread objects to represent them on the RT. We have chosen
+          to follow this architecture.
+        </p>
+        <hr class="h-px bg-zinc-800"/>
+        <p>    
+          The entire system is hosted in a single 
+          <code class="language-cpp">class UWorldSubsystem</code>, whose lifetime, tied with the game world's,
+          is completely taken care of for us by the engine. 
+          Another class, called <code class="language-cpp">class FCustomGrassRenderSystem</code>, is its render-thread proxy. These two objects
+          fully manage the system on the GT and RT side, respectively.
+        </p>
+        <p>    
+          The main concern of the render system class is to gather all the requests to render by the various grass components, 
+          sort them by priority or exclude them under certain conditions (for example, through distance or frustum culling).
+          After the queue of rendering work has been finalized, the system can allocate per-frame buffers, assign
+          them to grass tiles and dispatch the compute shaders to fill them up with grass data. 
+        </p>
+        <p>
+          To run the compute shaders, we have to hook into the engine's rendering pipeline. For our case, we can rely
+          on these simple delegates provided by the engine:
+        </p>
+          <pre class="overflow-x-auto max-w-full"><code class="language-cpp">GEngine->GetPreRenderDelegateEx().AddRaw(this, &FCustomGrassRenderSystem::BeginFrame);
+GEngine->GetPostRenderDelegateEx().AddRaw(this, &FCustomGrassRenderSystem::EndFrame);</code></pre>
+        <p>
+          We can then bind our two callbacks, <code class="language-cpp">BeginFrame()</code> and <code class="language-cpp">EndFrame()</code>,
+          to hook our rendering code at the beginning and end of the render pass. 
+        </p>
+        <p>
+          We rely on the <code class="language-cpp">GetDynamicMeshElements()</code> function, which is part of the 
+          interface of any scene proxy, and is mainly responsible for mesh drawing (more on that later). The renderer
+          <b>automatically</b> calls this function for us on any mesh valid for drawing, so we can hook there for adding
+          rendering work. 
+        </p>
+        <p>
+          As multiple tiles try to write concurrently to the render system, we re-use
+          work from the previous frame to avoid flickering issues,due to race conditions between the various worker threads,
+          when the camera is still.  
+        </p>
+        <p>
+          As we have to draw potentially millions of grass blades per-frame, we use indirect, instanced draw calls. 
+          Each grass tile is a <b>single draw call</b>, which fits naturally with Unreal's convention of a single draw call
+          per mesh component / proxy. Indirect drawing is required as the number of instances (the number of grass blades) 
+          is driven by the GPU through the main compute shader (more on that later).
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div>
+            <img src="assets/rs-dark.png" alt="Landscape tile subdivision" data-zoomable data-transparent
+                 class="max-w-full w-md md:w-2xl">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.2 — Graph visualization of the render system.
+          </figcaption>
+        </figure>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          The original system from <i>GoT</i> used a <b>double-buffer</b> approach where only up to 4 tiles worth of memory
+          are kept every frame, even though 8 tiles get processed. That's possible only by running compute pass
+          interleaved with draw pass, so that as we run the VS and PS on four tiles another batch of compute
+          shaders can run on the others at the same time.
+        </p>    
+        <p>    
+          Sadly, to my knowledge, such level of control of the rendering pipeline is not allowed in Unreal
+          (at least without modifying the engine); we can't in any way schedule when the proxies send the draw
+          calls and, at the same time, manually program the RDG graph. That means we have to ditch the two buffers
+          for a less performant, single monolithic buffer approach.
+        </p>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          We allocate a pooled buffer on construction according to its description:
+        </p>
+        <pre class="overflow-x-auto max-w-full"><code class="language-cpp">const FRDGBufferDesc InstanceDataBufferDesc = FRDGBufferDesc::CreateStructuredDesc(
+sizeof(FGrassBladeData), // Bytes per element
+MaxRenderedTiles * InstanceCountPerTile); // Total num of elements</code></pre>
+        <p>
+          Then, we use weak, per-frame references to the buffer to register them safely into the RDG graph for
+          the duration of the current frame.   
+        </p>
+        <pre class="overflow-x-auto max-w-full"><code class="language-cpp">struct FVolatileBuffers
+{
+	FRDGBufferRef	 InstanceDataBuffer;
+	FRDGBufferSRVRef InstanceDataBufferSRV; // Shader resource-view, 
+          // used by the vertex shader stage
+	FRDGBufferUAVRef InstanceDataBufferUAV; // Used in the compute shader stage for writing
+                
+    // etc...
+}</code></pre>
+        <pre class="overflow-x-auto max-w-full"><code class="language-cpp">void FCustomGrassRenderSystem::InitPerFrameResources(FRDGBuilder& GraphBuilder, 
+          FVolatileBuffers& Buffers) const
+{
+    Buffers.InstanceDataBuffer = GraphBuilder.RegisterExternalBuffer(InstanceDataBuffer);
+                
+    // etc...            
+}</code></pre>
+        <p>
+          The buffer is then ready to be passed as parameter to the compute shader.
+        </p>
+        <p class="p-4 mt-6 bg-zinc-800 border-l-4 rounded-md">
+          The reason we do not create directly the instance data buffer inside the graph 
+          (using <code class="language-cpp">GraphBuilder.CreateBuffer(...)</code>) but register it as an external resource, 
+          is because its lifetime goes beyond the execution of the graph, as we have to pass it to the
+          vertex shader / mesh draw pass (see the relative section).  
+        </p>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          An Unreal data asset is used to change parameters directly inside the editor,
+          even in real time as the game or play-in-editor session is running.
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/data_asset.png" alt="Landscape tile subdivision" data-zoomable
+                 class="max-w-full md:w-xl w-sm">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.3 — Data asset in editor showing various parameters.
+          </figcaption>
+        </figure>
+        <p>
+          As always, it is simply sufficient to
+          store a copy of the data asset on the RT and propagate changes from the GT by enqueueing a render command
+          that copies the current state of the data, on every frame.
+        </p>
+        <hr class="h-px bg-zinc-800" id="cs"/>
+        <h3 class="mt-4 mb-4 text-white text-xl md:text-2xl font-semibold">
+          Compute shader
+        </h3>
+        <p>The whole compute pass is split in two shaders:</p>
+        <ol class="list-decimal">
+          <li>
+            <code class="language-hlsl">InstanceGrassBlades()</code> - which constitutes the bulk of the pass - instances a grass blade 
+            for each thread, computes its world position and facing direction, and fills up other grass information 
+            (height, width, etc...). It also performs frustum / distance culling and discards threads accordingly. 
+            The surviving grass blade data is then written into the instance buffer;
+            <pre class="overflow-x-auto max-w-full"><code class="language-cpp">struct FGrassBladeData
+{
+	  FVector3f Position;
+	  FVector2f Facing;
+	  FVector3f TerrainNormal;
+	  float Height, Width, Tilt, Bend;
+	  uint32 Hash;
+};</code></pre>
+          </li>
+          <li>
+            <code class="language-hlsl">InitIndirectDrawArgs()</code>. This very simple shader runs on a single thread and writes the
+            arguments for indirect instanced drawing (required later for the mesh draw call). This must run separately
+            from the first as the total instance count must be known.
+          </li>
+        </ol>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          The idea to make grass grow in clumps, instead of appearing like a perfectly uniform field, was taken from the presentation: 
+          this gives off a much more realistic look. The clumping algorithm is essentially a
+          <b>Voronoi partition</b>, partitioning the field into cells and making grass blades "gravitate" towards the center
+          of the cell they belong to.
+        </p>
+        <p>The positioning algorithm is then roughly like this:</p>
+        <ol class="list-decimal space-y-8">
+          <li>
+            <div class="flex flex-col md:flex-row items-start gap-6">
+              <div class="flex flex-col gap-2 min-w-0 w-full">
+                use the compute shader's dispatch thread ID to get the position as UV coordinate inside the tile:
+                <pre class="overflow-x-auto max-w-full"><code class="language-hlsl">float2 UVPosition = DispatchThreadID.xy / InstanceCountPerTile;</code></pre>
+              </div>
+              <figure class="flex-shrink-0 w-48">
+                <div class="bg-white/5 border border-white/10 p-0.5">
+                  <img src="assets/position1.png" alt="1" data-zoomable
+                       class="w-full">
+                </div>
+              </figure>
+            </div>
+          </li>
+          <li>
+            <div class="flex flex-col md:flex-row items-start gap-6">
+              <div class="flex-1">
+                break up the resulting, grid-like distribution by applying a small random jitter to each instance;
+              </div>
+              <figure class="flex-shrink-0 w-48">
+                <div class="bg-white/5 border border-white/10 p-0.5">
+                  <img src="assets/position2.png" alt="2" data-zoomable
+                       class="w-full">
+                </div>
+              </figure>
+            </div>
+          </li>
+          <li>
+            <div class="flex flex-col md:flex-row items-start gap-6">
+              <div class="flex-1">
+                find the nearest clump center and pull the grass blade towards it, according to clump pull strength.
+              </div>
+              <figure class="flex-shrink-0 w-48 mb-16">
+                <div class="bg-white/5 border border-white/10 p-0.5">
+                  <img src="assets/position3.png" alt="3" data-zoomable
+                       class="w-full">
+                </div>
+              </figure>
+            </div>
+          </li>
+        </ol>
+        <p>
+          The carousel shows some of the possible combinations of the clumping system.
+        </p>
+        <div class="flex flex-col justify-center items-center">
+          <div class="embla mb-8 mt-4">
+            <div class="embla__viewport">
+              <div class="embla__container">
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/clumps0.png" alt="No clumps" data-zoomable>
+                    </div>
+                    <figcaption class="embla__slide-caption">
+                      2.4 — Uniform grass field with no clumping.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/clumps1.png" alt="No clumps" data-zoomable>
+                    </div>
+                    <figcaption class="embla__slide-caption">
+                      2.4 — Clumped grass separates the field, introduces depth yielding a more visually pleasant result.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/clumps2.png" alt="No clumps" data-zoomable>
+                    </div>
+                    <figcaption class="embla__slide-caption">
+                      2.4 — Very large clumps make the appearance of sections of cultivated wheatfields.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/clumps3.png" alt="No clumps" data-zoomable>
+                    </div>
+                    <figcaption class="embla__slide-caption">
+                      2.4 — Very tight clumps of grass facing outward from the clump center.
+                    </figcaption>
+                  </figure>
+                </div>
+                <div class="embla__slide">
+                  <figure class="embla__figure">
+                    <div class="embla__img-wrap">
+                      <img src="assets/clumps4.png" alt="No clumps" data-zoomable>
+                    </div>
+                    <figcaption class="embla__slide-caption">
+                      2.4 — Small patches of grass, facing inward, give off a more realistic look.
+                    </figcaption>
+                  </figure>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-center items-center mt-2.5">
+              <p class="embla__caption mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic"></p>
+            </div>
+            <div class="embla__controls md:p-0 px-6 md:justify-between justify-center">
+              <div class="embla__buttons md:flex hidden">
+                <button class="embla__button embla__button--prev embla__button--disabled" type="button">
+                  <svg class="embla__button__svg" viewBox="0 0 532 532">
+                    <path fill="currentColor" d="M355.66 11.354c13.793-13.805 36.208-13.805 50.001 0 13.785 13.804 13.785 36.238 0 50.034L201.22 266l204.442 204.61c13.785 13.805 13.785 36.239 0 50.044-13.793 13.796-36.208 13.796-50.002 0a5994246.277 5994246.277 0 0 0-229.332-229.454 35.065 35.065 0 0 1-10.326-25.126c0-9.2 3.393-18.26 10.326-25.2C172.192 194.973 332.731 34.31 355.66 11.354Z"
+                    ></path>
+                  </svg>
+                </button>
+                <button class="embla__button embla__button--next embla__button--disabled" type="button">
+                  <svg class="embla__button__svg" viewBox="0 0 532 532">
+                    <path fill="currentColor" d="M176.34 520.646c-13.793 13.805-36.208 13.805-50.001 0-13.785-13.804-13.785-36.238 0-50.034L330.78 266 126.34 61.391c-13.785-13.805-13.785-36.239 0-50.044 13.793-13.796 36.208-13.796 50.002 0 22.928 22.947 206.395 206.507 229.332 229.454a35.065 35.065 0 0 1 10.326 25.126c0 9.2-3.393 18.26-10.326 25.2-45.865 45.901-206.404 206.564-229.332 229.52Z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="embla__dots"></div>
+            </div>
+          </div>
+        </div>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          When switching tests from single to multiple tiles, we had to make sure the tiles appear seamless and 
+          give off the impression of a single, uniform grass field.
+          This change involves switching from a seed "blind" to other tiles,
+        </p>
+        <pre class="overflow-x-auto max-w-full"><code class="language-hlsl">uint Seed = DispatchThreadID.x + DispatchThreadID.y * InstanceCountPerTileX;</code></pre>
+        <p>to a global seed:</p>
+        <pre class="overflow-x-auto max-w-full"><code class="language-hlsl">float2 InstancesPerQuad = float2(InstanceCountPerTileX, InstanceCountPerTileY) / TileSizeInQuads;
+          
+// Tile offset from landscape origin.          
+int2 TileOffset = int2(SectionBaseX, SectionBaseY);          
+int2 GlobalInstancePos = TileOffset * InstancesPerQuad + DispatchThreadID.xy;
+                  
+uint Seed = GlobalInstancePos.x + GlobalInstancePos.y;</code></pre>
+        <p>
+          To introduce variation, each grass parameter is slightly altered by a random offset.
+        </p>
+        <hr class="h-px bg-zinc-800" id="vs"/>
+        <h3 class="mt-4 mb-4 text-white text-xl md:text-2xl font-semibold">
+          Mesh and vertex shader
+        </h3>
+        <p>
+          We've used a <b>custom mesh component</b> to represent a tile of grass, subclassing the native
+          <code class="language-cpp">class UPrimitiveComponent</code> (which represents a component in the scene containing geometry to be rendered).
+        </p>
+        <p>    
+          Unreal already comes with a large variety of such components for various uses,
+          (static meshes, skeletal meshes, etc...) but a custom one is required in order to manually program the vertex 
+          shader (or have any control whatsoever over the vertex buffer). 
+        </p>    
+        <p>    
+          As we've previously shown, implementing a <code class="language-cpp">class UPrimitiveComponent</code> implies writing its 
+          RT-side proxy (<code class="language-cpp">class FPrimitiveSceneProxy</code>) and its corresponding vertex factory. Inside the
+          material proxy, draw calls are issued in <code class="language-cpp">GetDynamicMeshElements()</code>.
+        </p>
+        <p>
+          Here we register various information:
+        </p>
+        <pre class="overflow-x-auto max-w-full"><code class="language-cpp">...
+Mesh.Type = PT_TriangleStrip;
+        
+// Usage flags        
+Mesh.bUseForMaterial  = true;
+Mesh.bUseForDepthPass = true;
+...
+          
+FMeshBatchElement& BatchElement = Mesh.Elements[0];
+BatchElement.IndexBuffer = VertexFactory->GetIndexBuffer();      
+
+// We pass an handle share with the render system, with the 'promise' that 
+// the buffer will be filled by the compute shader at the time of usage.
+BatchElement.IndirectArgsBuffer = ResourceHandles->IndirectDrawArgs;        
+          
+...</code></pre>
+        <p>
+          As can be seen, the proxies trust the render system to initialize the indirect draw args buffer through
+          a shared handle (a <code class="language-cpp">class TSharedPtr<span>&#60</span>T<span>&#62</span></code>). This 
+          is naturally ensured by our compute pass running at the beginning of the render pass. 
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/eids.png" alt="RenderDoc screenshot showing compute pass running before base pass" 
+                 data-zoomable
+                 class="max-w-full w-sm md:w-lg">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.5 — Frame render breakdown in RenderDoc, showing compute pass running before drawing.
+          </figcaption>
+        </figure>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          A <b>vertex factory</b> is, basically, an Unreal Engine abstraction over the vertex shader: it sets up vertex
+          buffers, index buffers, defines shader parameters and binds them, etc... 
+        </p>
+        <p>
+          Our grass blade geometry is constructed using only vertex and instance id:
+        </p>
+        <pre class="overflow-x-auto max-w-full"><code class="language-hlsl">struct FVertexFactoryInput
+{
+    uint VertexId : SV_VertexID;
+    uint InstanceId : SV_InstanceID;
+};</code></pre>
+        <p>
+          No vertex buffers are bound (known as <i>manual vertex fetch</i> in Unreal).
+        </p>
+        <p>
+          We've split the implementation of the vertex shader into two files: <span class="font-mono">VertexFactory.ush</span> contains
+          mostly boilerplate code required by the VF; inside <span class="font-mono">VertexShader.ush</span> resides the main logic.
+        </p>
+        <hr class="h-px bg-zinc-800"/>
+        <p>    
+          As we've said, grass blade geometry is fully generated using just <code class="language-hlsl">VertexId</code>.
+        </p>         
+        <p>
+          We construct the grass blade from a <b>cubic Bézier curve</b>; this makes it
+          very easy to calculate the position of the vertices by simply evaluating the curve at various heights, calculate
+          vertex normals through the Bézier derivative, and program animations for the grass. 
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/geometry.png" alt="Grass blade geometry"
+                 data-zoomable
+                 class="max-w-full w-sm">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.6 — Grass blade geometry visualization inside the editor.
+          </figcaption>
+        </figure>
+        <p>        
+          Blade normals are also slightly tilted outwards, to make the grass appear less flat. 
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img-comparison-slider class="!block !outline-none">
+              <figure slot="first">
+                <img class="max-w-full w-sm md:w-xl"
+                     src="assets/flat-normals.png"
+                     alt="Comparison: flat normals" />
+              </figure>
+              <figure slot="second">
+                <img class="max-w-full w-sm md:w-xl"
+                     src="assets/round-normals.png"
+                     alt="Comparison: rounded normals" />
+              </figure>
+            </img-comparison-slider>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.7 — Flat normals vs rounded normals, visible on the front-face (the "back") of the blades (accentuated for
+            visualization purposes).
+          </figcaption>
+        </figure>
+        <hr class="h-px bg-zinc-800"/>
+        <p>
+          Using this approach, grass viewed side-on appears degenerate due to its zero thickness, 
+          rendering as visual artifacts or even completely invisible. 
+        </p>
+        <p>
+          At first, I tried rotating the grass very subtly to always face the camera: we can obtain quite good results
+          with this without making the grass look like it's moving. The issue with this solution is that it somewhat defeats having
+          multiple grass directions as it homogenizes them towards a certain range of values. 
+        </p>   
+        <p>
+          A better approach is to slightly shift the position of vertices in view-space when looked at 
+          perpendicularly. This creates a fake thickness which also has the added benefit of making grass fields appear fuller.  
+        </p>
+        <p class="p-4 mt-6 bg-zinc-800 border-l-4 rounded-md">
+          The mesh does not support <b>Nanite</b>. Nanite <i>"runs in its own rendering 
+          pass that completely bypasses traditional draw calls"</i> 
+          (<a href="#ue_docs_nanite">source</a>). 
+          To make it so would require a total rewrite of the system and, to my knowledge, 
+          there's little to no documentation online about it.
+        </p>
+        <hr class="h-px bg-zinc-800" id="ps"/>
+        <h3 class="mt-4 mb-4 text-white text-xl md:text-2xl font-semibold">
+          Pixel shader
+        </h3>
+        <p>
+          To shade the grass, we have built a very simple material. We have custom-made a <span>64 x 1</span> texture, stretched
+          vertically across the blade, to represent the grass blade spline in the final color and drive glossiness.
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/mat.png" alt="Landscape tile subdivision" data-zoomable
+                 class="max-w-full w-md md:w-lg">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.8 — Basic grass material.
+          </figcaption>
+        </figure>
+        <p>
+          The material should normally use the "Two Sided Foliage" shading model for correct lighting on the backface (the lighting 
+          is not fully occluded by the grass leaf, but it's scattered by the surface, so that the backface gets some light 
+          too).
+        </p>
+        <hr class="h-px bg-zinc-800 mt-4"/>
+        <p>
+          The presence of many small triangles very close to each other creates lots of visual noise, particularly
+          in the presence of dense clumps of grass. To achieve a clean, final result, we relied on temporal antialiasing.
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img-comparison-slider class="!block !outline-none">
+              <figure slot="first">
+                <img class="max-w-full w-md md:w-3xl"
+                     src="assets/no-aa.png"
+                     alt="Comparison: no antialiasing" />
+              </figure>
+              <figure slot="second">
+                <img class="max-w-full w-md md:w-3xl"
+                     src="assets/taa.png"
+                     alt="Comparison: temporal antialiasing" />
+              </figure>
+            </img-comparison-slider>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            2.9 — Image quality comparison without antialiasing (left) and using TAA (right).
+          </figcaption>
+        </figure>
+        <hr class="h-px bg-zinc-800 mt-4"/>
+        <h3 class="mt-4 mb-4 text-white text-2xl font-semibold">Shadows</h3>
+        <p class="p-4 mt-6 bg-zinc-800 border-l-4 rounded-md shadow-2xl">
+          This section is on a feature still undergoing active development.
+        </p>
+        <p>
+          There were major issues with letting the custom mesh cast shadows. Still, running the full shadow pass for
+          each grass blade would be too costly. We've started using an <b>imposter shadow proxy mesh</b>,
+          which is a common approach for foliage and also used in <i>GoT</i>. In the presentation, they mentioned
+          offsetting the landscape vertices by grass height at that location, and writing from there
+          in a dithered pattern to the shadow map.
+        </p>    
+        <p>
+          At first, we've tried offsetting the landscape vertices directly, by using WorldPositionOffset (WPO) inside
+          the landscape material; then, we could've masked them off except for the shadow pass, using the
+          <a href="https://unrealdirective.com/tips/shadow-pass-switch/"><i>ShadowPassSwitch</i></a> node.
+          This approach didn't work, probably due to peculiarities of the landscape mesh itself.
+          After some iterations, we were able to correctly set up the proxy mesh as a <code>UStaticMesh</code>,
+          whose geometry is generated at runtime as a copy of the landscape tile, and set to cast shadows while
+          invisible.
+        </p>    
+        <p>
+          Unreal has several shadow algorithms, also depending on scene lighting. For grass fields in the open,
+          we can assume our lighting setup to be made up mainly of a regular skylight and a directional light,
+          representing light coming from the sun (or moon, at nighttime). The general solution we aim for consists of:
+        </p>
+        <ul class="list-disc">
+          <li>dynamic lighting, so we take into account possible grass animation
+            (like wind, or reacting to player movement);</li>
+          <li>medium-large distance shadows, cast by the proxy, using <b>shadow maps</b>: these represent
+            shadowing for the overall "mass" of grass;</li>
+          <li>close-distance shadows using screen-space <b>contact shadows</b>, cast by each grass blade, to have
+            more realistic "connection" between the grass mesh and the ground. These get simply enabled on the mesh
+            and the directional light.</li>  
+        </ul>
+        <p>
+          A <b>texture atlas</b> is prepared containing slots for <code class="language-cpp">GMaxRenderedTiles</code>, 
+          each slot containing:
+        </p>
+        <ul class="list-disc">
+          <li>on the R channel, height information;</li>
+          <li>on the G channel, density</li>  
+        </ul>
+        <p>
+          Height and density respectively drive vertex offset and dithering: less density means more pixels
+          discarded from the final shadow. Of course, density gets higher near clump centers, with stronger
+          clumping, etc...
+        </p>
+        <p>
+          Initially, the shadow offset was calculated using exact grass height for each vertex, but a race
+          condition between the writer threads would introduce slight jittering of the proxy mesh vertices between
+          frames, depending on which grass blade would "write" into the texture last on that frame. This slight
+          movement would mess with the TAA accumulation and dithering, leaving very dark noise on the shadowed
+          grass blades.
+        </p>
+        <p>
+          We could choose to fix the race by introducing some kind of synchronization mechanism, but it was unnecessary: it was
+          sufficient to let each thread write the same approximate grass height value (the maximum height), so that
+          each would be writing the same value anyway, in fact eliminating the jittering.
+        </p>
+        <hr class="h-px bg-zinc-800 mt-4" id="optimization"/>
+        <h2 class="mt-4 mb-4 text-white text-3xl md:text-4xl font-semibold">
+          Part III: Optimization, performance and conclusions
+        </h2>
+        <p class="first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
+          We can pack the terrain normal vector using <a href="#oct-encoding">oct-encoding</a> and float values in 16-bit uints. 
+          This memory-efficient version of the <code class="language-cpp">struct FGrassBladeData</code> makes each grass blade 
+          go from 52B to 28B: the result is an almost halved memory cost for the instance buffer. 
+          For around a million grass blades per tile and four tiles at a time, the cost goes down
+          from around 200MB to less than 100MB, which is quite an improvement in VRAM usage and bandwidth.  
+        </p>
+        <hr class="h-px bg-zinc-800 mt-4"/>
+        <p>
+          The system supports different LODs, which mainly regulate mesh resolution (its vertex count) and total blade
+          count:
+        </p>
+        <ul class="list-disc">
+          <li>
+            <div class="flex flex-col gap-1.5 items-start">
+              <span>
+                <span class="font-mono">LOD0</span>: 15 vertices per blade, 1024 × 1024 blades
+              </span>
+              <figure>
+                <div class="bg-white/5 border border-white/10 p-0.5">
+                  <img class="max-w-full w-full md:w-lg" data-zoomable
+                       src="assets/lod0.png"
+                       alt="LOD0" />
+                </div>
+              </figure>
+            </div>
+          </li>
+          <li>
+            <div class="flex flex-col gap-1.5 items-start"> 
+              <span>
+                <span class="font-mono">LOD1</span>: 7 vertices per blade, 1024 × 1024 blades
+              </span>
+              <figure>
+                <div class="bg-white/5 border border-white/10 p-0.5">
+                  <img class="max-w-full w-full md:w-lg" data-zoomable
+                       src="assets/lod1.png"
+                       alt="LOD1" />
+                </div>
+              </figure>
+            </div>
+          </li>
+          <li>
+            <div class="flex flex-col gap-1.5 items-start">
+              <span>
+                <span class="font-mono">LOD2</span>: 7 vertices per blade, 512 × 512 blades
+              </span>
+              <figure>
+                <div class="bg-white/5 border border-white/10 p-0.5">
+                  <img class="max-w-full w-full md:w-lg" data-zoomable
+                       src="assets/lod2.png"
+                       alt="LOD2" />
+                </div>
+              </figure>
+            </div>
+          </li>
+        </ul>
+        <p>
+          As can be seen, at high distances total instance count goes from slightly more than 1 million to around 260k.
+          Additionally, LOD2 disables two-sided rendering for the mesh and makes each grass blade always face the camera,
+          thus letting us benefit from <b>backface culling</b> for better performance without noticeable visual quality
+          loss.
+        </p>
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img-comparison-slider class="!block !outline-none">
+              <figure slot="first">
+                <img class="max-w-full w-md"
+                     src="assets/lod2-comparison-1.png"
+                     alt="Comparison: two-sided" />
+                <figcaption class="absolute top-8 -translate-y-1/2 left-3 
+                bg-black/60 border border-zinc-800 rounded-md text-zinc-400 p-2 text-sm font-semibold tracking-wide">
+                  Two-sided
+                </figcaption>
+              </figure>
+              <figure slot="second">
+                <img class="max-w-full w-md"
+                     src="assets/lod2-comparison-2.png"
+                     alt="Comparison: no two-sided" />
+                <figcaption class="absolute top-8 -translate-y-1/2 right-3 
+                bg-black/60 border border-zinc-800 rounded-md text-zinc-400 p-2 text-sm font-semibold tracking-wide">
+                  One-sided
+                </figcaption>
+              </figure>
+            </img-comparison-slider>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            3.1 — Comparison between two-sided and one-sided rendering for grass in the far distance at LOD2.
+          </figcaption>
+        </figure>
+        <hr class="h-px bg-zinc-800 mt-4"/>
+        <p>
+          We use <a href="#wave-intrinsics">wave intrinsics</a>
+          to perform a compacted write inside the instance data buffer. This counters the internal fragmentation
+          caused by culling inside a tile's memory region in the buffer (even though we can't compact the whole buffer),
+          and improves cache locality. We can also reduce the total number of atomics from N to a single one.
+        </p>
+        <pre class="overflow-x-auto max-w-full"><code class="language-hlsl">bool IsCulled = TestInstanceCulling(GrassBlade);
+	
+uint LaneIndex_Wave = WavePrefixCountBits(!IsCulled);
+uint VisibleBladeCount_Wave = WaveActiveCountBits(!IsCulled);
+
+// Used to perform compact writing inside the buffer. Allows us
+// to store all the grass blade data (for a tile) contiguously.
+uint BufferWriteIndex = 0;
+if (WaveIsFirstLane())
+{
+	// Issue one atomic for the entire wave.
+	InterlockedAdd(OutInstanceCounter[TileIndex], VisibleBladeCount_Wave, BufferWriteIndex);
+}
+
+// Broadcast of the value calculated at lane 0.
+BufferWriteIndex = WaveReadLaneFirst(BufferWriteIndex);
+BufferWriteIndex += LaneIndex_Wave + TileIndex * BufferRegionSize;
+	
+if (!IsCulled)
+{
+	OutInstanceDataBuffer[BufferWriteIndex] = GrassBlade;
+}</code></pre>
+        <hr class="h-px bg-zinc-800 mt-4"/>
+        <p>
+          Group size for the main compute shader is set at 64: it is normally chosen because it maps well to a single
+          wavefront in both NVIDIA and AMD GPU architectures (AMD wavefront = 64, NVIDIA warp = 32).
+        </p>
+        <hr class="h-px bg-zinc-800 mt-4"/>
+        <p>
+          I was not able to test this on a consistent configuration, so the absolute values may vary;
+          still, the relative costs in percentage should be consistent across performance levels.
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="flex flex-row gap-5">
+            <div class="bg-white/5 border border-white/10 p-0.5">
+              <img src="assets/compute_cost1.png" alt="Compute pass cost: detail" data-zoomable
+                   class="max-w-full md:w-xl w-sm">
+            </div>
+            <div class="bg-white/5 border border-white/10 p-0.5">
+              <img src="assets/compute_cost2.png" alt="Compute pass cost: comparison with GPU cost" data-zoomable
+                   class="max-w-full md:w-xl w-sm">
+            </div>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            3.2 — Unreal Insights: graph with the compute pass cost over time. On the right the same
+            graph but put in perspective to the overall GPU cost (in light blue).
+          </figcaption>
+        </figure>
+        <p>  
+          The CustomGrass compute pass takes 1.8ms, around 2% of frame time. The cost is dominated by the
+          <code class="language-hlsl">InstanceGrassBlades()</code> compute shader, which runs 4 times under the current
+          settings. The final cost of each instancing pass is determined by the number of threads / instances, depending on
+          level-of-detail and culling. The second compute shader takes almost no time: on average 0.01% of a frame.
+        </p>
+        <p>
+          An obvious optimization (not currently tested) would be to limit the number of rendered tiles depending on the current
+          view, instead of going through the whole pipeline for 4 of them at all times. In most cases, two tiles are more than 
+          sufficient for covering all the visible terrain.
+        </p>
+        <hr class="h-px bg-zinc-800 mt-4" />
+        <p>
+          By looking at <code>stat unit</code>, it noticed that the Draw time was nearly equal to the Frame
+          time, meaning we are Draw bound. That prompted me to inspect the draw call cost inside base pass (and
+          other passes whose cost is determined by rendered geometry like prepass). 
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/draw_timings0.png" alt="Draw timings: optimized" data-zoomable
+                 class="max-w-full md:w-xl w-sm">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            3.3 — Frame capture: shows more draw calls being issue than the expected number of rendered tiles. Highlighted
+            on the right are high performance costs.
+          </figcaption>
+        </figure>
+        <p>  
+          On the image above, you can see the draw calls in our test scene. It is clear that we are issuing draw calls for 10 grass tiles 
+          (out of 16), even though we capped our number of rendered tiles to 4 (and 4 are visible in the final scene)! 
+          It turns out that, with our current system, we are simply opting-out of rendering only for compute pass, while 
+          the actual meshes have no knowledge of this: provided they pass frustum culling (which is why not all tiles are 
+          showing up in that frame) they will simply get drawn if they hit this line in <code class="language-cpp">GetDynamicMeshElements()</code>:
+        </p>
+<pre class="overflow-x-auto max-w-full"><code class="language-cpp">Collector.AddMesh(ViewIndex, Mesh);</code></pre>
+        <p>
+          This issue, of course, makes us waste lots of computation time (and it gets worse as the landscape grows larger). There's also
+          the fact the visible tiles that not necessarily are those with a non-negligible cost, as, in the image, it clearly
+          shows that 5 tiles are taking more than 1ms to draw on screen, with (at least) one of those being empty.
+        </p>
+        <p>
+          To fix this, we have to early-out of <code class="language-cpp">GetDynamicMeshElements()</code> if our tile
+          was not selected for rendering. As always the fundamental ordering problem remains: selection happens <i>after</i>
+          each mesh sends its dynamic elements to the renderer. To work around this, we simply moved the selection
+          phase at the end of the frame, instead of at the beginning. On frame <span class="font-mono">N-1</span>, 
+          we select the tiles valid for rendering for frame <span class="font-mono">N</span>, by "stamping" the frame number on a field in the class. So, when 
+          <code class="language-cpp">GetDynamicMeshElements()</code> runs on frame <span class="font-mono">N</span>, it checks early if the stamp matches
+          the current frame number: if not, the function terminates early and the tile skips drawing. 
+          This 1 frame latency in rendering is almost negligible at normal frame rates, and minor hiccups like culling
+          showing up visually at the screen sides when turning the camera rapidly can be countered by simply "relaxing" 
+          culling by virtually enlarging the cone of vision.
+        </p>
+        <p>
+          This is the final result on a frame:
+        </p>
+        <figure class="flex flex-col items-center gap-3 md:my-10 my-8">
+          <div class="bg-white/5 border border-white/10 p-0.5">
+            <img src="assets/draw_timings1.png" alt="Draw timings: unoptimized" data-zoomable
+                 class="max-w-full md:w-xl w-sm">
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            3.4 — Frame capture: now only 4 draw calls are getting issued.
+          </figcaption>
+        </figure>        
+        <p>
+          As seen above, drawing a semi-full, high LOD grass tile may take up to 9 times the time it takes to draw
+          a tile at LOD2.
+        </p>
+        <hr class="h-px bg-zinc-800 mt-4" id="src"/>
+        <h2 class="mt-4 mb-4 text-white text-3xl md:text-4xl font-semibold">
+          Sources
+        </h2>
+        <p>
+          Below is a list of materials which helped with the realization of this project and were partially quoted in this article. 
+          For the general grass implementation:
+        </p>
+        <ul class="list-disc">
+          <li>
+            <a href="https://www.youtube.com/watch?v=Ibe1JBF5i5Y" id="gdc">
+              Procedural Grass in 'Ghost of Tsushima' - GDC
+            </a>
+          </li>
+        </ul>
+        <p>
+          On graphics programming in Unreal (global shaders, custom primitives, writing code for the render-thread, etc...):
+        </p>
+        <ul class="list-disc">
+          <li>
+            <a href="https://medium.com/@manning.w27/advanced-graphics-programming-in-unreal-part-1-10488f2e17dd" 
+               target="_blank" rel="noopener noreferrer">
+              Advanced graphics programming in Unreal - Article series
+            </a>
+          </li>
+          <li>
+            <a href="https://medium.com/realities-io/creating-a-custom-mesh-component-in-ue4-part-0-intro-2c762c5f0cd6" 
+               target="_blank" rel="noopener noreferrer">
+              Creating a custom mesh component in UE4 - Article series
+            </a>
+          </li>
+          <li>
+            <a href="https://dev.epicgames.com/documentation/unreal-engine/graphics-programming-overview-for-unreal-engine" 
+               target="_blank" rel="noopener noreferrer">
+              Graphics Programming Overview - Unreal Docs
+            </a>
+          </li>
+          <li>
+            <a href="https://dev.epicgames.com/documentation/unreal-engine/threaded-rendering-in-unreal-engine" 
+               target="_blank" rel="noopener noreferrer">
+              Threaded Rendering - Unreal Docs
+            </a>
+          </li>
+          <li>
+            <a href="https://dev.epicgames.com/documentation/unreal-engine/render-dependency-graph-in-unreal-engine" id="rdg" 
+               target="_blank" rel="noopener noreferrer">
+              Render Dependency Graph - Unreal Docs
+            </a>
+          </li>
+          <li>
+            <a href="https://dev.epicgames.com/documentation/unreal-engine/nanite-virtualized-geometry-in-unreal-engine"
+               id="ue_docs_nanite" target="_blank" rel="noopener noreferrer">
+              Nanite Virtualized Geometry Overview - Unreal Docs
+            </a>
+          </li>
+        </ul>
+        <p>
+          For the optimization section:
+        </p>
+        <ul class="list-disc">
+          <li>
+            <a href=https://unrealartoptimization.github.io/book/" 
+               target="_blank" rel="noopener noreferrer">
+              Unreal Art Optimization - Blog
+            </a>
+          </li>
+          <li>
+            <a href="https://knarkowicz.wordpress.com/2014/04/16/octahedron-normal-vector-encoding/" id="oct-encoding" 
+               target="_blank" rel="noopener noreferrer">
+              Octahedron normal vector encoding - Article
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/microsoft/directxshadercompiler/wiki/wave-intrinsics" id="wave-intrinsics" 
+               target="_blank" rel="noopener noreferrer">
+              Wave Intrinsics - Microsoft DirectX Shader Compiler Wiki
+            </a>
+          </li>
+        </ul>
+      </div>  
+    </article>
+    <footer class="bg-zinc-950 text-zinc-500 border-t-8 border-t-zinc-800 
+    md:p-4 p-3 md:text-sm text-xs font-mono tracking-wide">
+      <div class="md:mx-4 mx-2 flex flex-row justify-between">
+        <div>
+          Luca Gabellini © 2026
+        </div>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
