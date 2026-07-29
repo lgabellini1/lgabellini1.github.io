@@ -36,24 +36,48 @@
             <span></span>
           </div>
         </a>
-        <h1 class="flex flex-col gap-2.5 mb-4 sm:mb-8 max-w-2xl text-white sm:text-5xl text-4xl font-semibold">
+        <h1 class="flex flex-col gap-2.5 mb-4 max-w-2xl text-white sm:text-5xl text-4xl font-semibold">
           <span class="tracking-wide text-[clamp(2rem,5vw,3rem)]">Custom Procedural Grass</span>
           <span class="block md:hidden font-light text-2xl text-zinc-500 tracking-wider">for Unreal Engine 5</span>
           <span class="hidden md:block font-light text-zinc-500 sm:text-4xl text-3xl sm:ml-16 ml-8 tracking-wider">for</span>
           <span class="hidden md:block tracking-wide text-[clamp(2rem,5vw,3rem)]">Unreal Engine 5</span>
         </h1>
       </header>
-      <div class="max-w-4xl">
-        <hr class="h-px bg-zinc-800"/>
-        <ul class="list-disc">
+      <hr class="self-stretch w-full h-px bg-zinc-800 mx-4 mb-6 sm:mb-10"/>
+      <div class="max-w-4xl mt-6 sm:mt-10">
+        <div class="mb-10">
+          <span class="text-white tracking-widest font-mono text-xl">
+            SUMMARY
+          </span>
+          <ul class="list-disc mt-4 leading-relaxed space-y-3">
+            <li>
+              A fully custom, GPU-driven procedural grass system for UE5, built from scratch using
+              Unreal's Render Dependency Graph (RDG) to stage a fully programmable compute → vertex → pixel shader pipeline.
+            </li>
+            <li>
+              Able to generate and render millions of grass blades each frame using an indirect, multi-LOD, instanced
+              draw system. Grass blade geometry is based on a Bézier-curve shape, which allows programming
+              animations directly inside the vertex shader.
+            </li>
+            <li>
+              Supports full customization of the final grass field through parameters, including grass size and shape,
+              material and growth and distribution of the clumps, calculated using an altered Voronoi algorithm.
+            </li>
+          </ul>
+          <hr class="h-px bg-zinc-800 mt-8"/>
+        </div>
+        <span class="text-white tracking-widest font-mono text-xl">
+          INDEX
+        </span>
+        <ul class="list-disc mt-4 space-y-1">
           <li>
             <a href="#intro">Part I: Intro</a>
           </li>
           <li>
             <a href="#overview">Part II: Overview</a>
           </li>
-          <li class="list-none">  
-            <ul class="list-disc">
+          <li class="list-none">
+            <ul class="list-disc mt-1 space-y-1">
               <li>
                 <a href="#rs" class="">Render system</a>
               </li>
@@ -69,13 +93,13 @@
             </ul>
           </li>
           <li>
-            <a href="#optimization">Part III: Optimization, performance and conclusions</a>
+            <a href="#optimization">Part III: Optimization & performance</a>
           </li>
           <li>
             <a href="#src">Sources</a>
           </li>
         </ul>
-        <hr class="h-px bg-zinc-800" id="intro"/>
+        <hr class="h-px bg-zinc-800 mt-8" id="intro"/>
         <h2 class="mt-10 mb-4 text-white text-3xl md:text-4xl font-semibold">
           Part I: Intro
         </h2>
@@ -798,7 +822,7 @@ BatchElement.IndirectArgsBuffer = ResourceHandles->IndirectDrawArgs;
         </p>
         <hr class="h-px bg-zinc-800 mt-4" id="optimization"/>
         <h2 class="mt-4 mb-4 text-white text-3xl md:text-4xl font-semibold">
-          Part III: Optimization, performance and conclusions
+          Part III: Optimization & performance
         </h2>
         <p class="first-letter:text-7xl first-letter:text-heading first-letter:me-3 first-letter:float-start">
           We can pack the terrain normal vector using <a href="#oct-encoding">oct-encoding</a> and float values in 16-bit uints. 
