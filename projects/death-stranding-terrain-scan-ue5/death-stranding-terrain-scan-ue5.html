@@ -19,28 +19,56 @@
 <body>
   <main>
     <article class="bg-zinc-900 text-gray-400 px-8 py-4 flex flex-col items-center">
-      <div class="floating-btn absolute right-8">
+      <div class="floating-btn absolute hidden md:inline right-8">
         <a href="#" class="font-mono tracking-wide text-sm">
           Back to top
         </a>
       </div>
-      <header class="self-start p-4 flex flex-row items-start justify-between w-full">
-        <h1 class="flex flex-col gap-2.5 mb-8 max-w-5xl text-white text-5xl font-semibold">
-          <span class="tracking-wide">Terrain Scan (from <i>Death Stranding</i>)</span>
-          <span class="font-light text-4xl ml-16 tracking-wider">in</span>
-          <span class="tracking-wide">Unreal Engine 5</span>
-        </h1>
-        <a class="!no-underline mt-1" href="">
+      <header class="self-start p-4 flex flex-col md:flex-row-reverse items-start justify-between w-full">
+        <a class="!no-underline mt-1 md:mb-0 mb-8" href="/index.html">
           <div class="flex flex-row items-center gap-1">
             <span class="material-symbols-outlined">arrow_back</span>
             <span class="tracking-wider">TO MAIN PAGE</span>
             <span></span>
           </div>
         </a>
+        <h1 class="flex flex-col gap-2.5 mb-4 max-w-4xl text-white sm:text-5xl text-4xl font-semibold">
+          <span class="tracking-wide text-[clamp(2rem,5vw,3rem)]">Terrain Scan (from <i>Death Stranding</i>)</span>
+          <span class="block md:hidden font-light text-2xl text-zinc-500 tracking-wider">for Unreal Engine 5</span>
+          <span class="hidden md:block font-light text-zinc-500 sm:text-4xl text-3xl sm:ml-16 ml-8 tracking-wider">for</span>
+          <span class="hidden md:block tracking-wide text-[clamp(2rem,5vw,3rem)]">Unreal Engine 5</span>
+        </h1>
       </header>
-      <div class="max-w-4xl">
-        <hr class="h-px bg-zinc-800"/>
-        <ul class="list-disc">
+      <hr class="self-stretch w-full h-px bg-zinc-800 mx-4 mb-6 sm:mb-10"/>
+      <div class="max-w-4xl mt-6 sm:mt-10">
+        <div class="mb-10">
+          <span class="text-white tracking-widest font-mono text-xl">
+            SUMMARY
+          </span>
+          <ul class="list-disc mt-4 leading-relaxed space-y-3">
+            <li>
+              A reconstruction of the "terrain scan" mechanic and graphical effect from the game
+              <i>Death Stranding</i>, usable as a player action on a third-person character.
+              Implemented as a post-process effect driven by game code and based on a modified
+              Sobel edge filter, producing scan lines that can outline any surface.
+            </li>
+            <li>
+              Built a GPU particle system using Unreal's Niagara tool to handle real-time spawning
+              and animation of hundreds of icons for terrain type detection. These icons hover on the terrain
+              for a some time, following the terrain shape accurately by reading depth and normal data.
+            </li>
+            <li>
+              Also implements a third-person character footprint system based on decals. These
+              footprints interact with the scan system, highlighting when they sit within the
+              scan's cone of effect.
+            </li>
+          </ul>
+          <hr class="h-px bg-zinc-800 mt-8"/>
+        </div>
+        <span class="text-white tracking-widest font-mono text-xl">
+          INDEX
+        </span>
+        <ul class="list-disc mt-4 space-y-1">
           <li>
             <a href="#part-I">Part I: Terrain Scan Lines</a>
           </li>
@@ -51,7 +79,7 @@
             <a href="#part-III">Part III: Footsteps</a>
           </li>
           <li>
-            <a href="#conclusion">Performance and conclusions</a>
+            <a href="#conclusions">Performance and conclusions</a>
           </li>
         </ul>
         <hr class="h-px bg-zinc-800" id="part-I"/>
