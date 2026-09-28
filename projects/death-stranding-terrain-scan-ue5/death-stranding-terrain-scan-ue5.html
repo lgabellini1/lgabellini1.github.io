@@ -53,12 +53,12 @@
               Sobel edge filter, producing scan lines that can outline any surface.
             </li>
             <li>
-              Built a GPU particle system using Unreal's Niagara tool to handle real-time spawning
+              Built a GPU particle system using Unreal's <i>Niagara</i> tool to handle real-time spawning
               and animation of hundreds of icons for terrain type detection. These icons hover on the terrain
-              for a some time, following the terrain shape accurately by reading depth and normal data.
+              for the duration of the effect, following the terrain shape accurately by reading depth and normal data.
             </li>
             <li>
-              Also implements a third-person character footprint system based on decals. These
+              Also implements a footprint system for the TP character based on decals. These
               footprints interact with the scan system, highlighting when they sit within the
               scan's cone of effect.
             </li>
@@ -82,6 +82,20 @@
             <a href="#conclusions">Performance and conclusions</a>
           </li>
         </ul>
+        <hr class="h-px bg-zinc-800"/>
+        <figure class="flex flex-col items-center gap-3 my-10">
+          <div class="bg-white/5 border border-white/10 p-0.5 w-full grow">
+            <iframe src="https://www.youtube.com/embed/WzCRMx1pNxE?si=TskrIAQvYaNK4DY5"
+                    title="Reference video"
+                    class="w-full aspect-video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+            </iframe>
+          </div>
+          <figcaption class="mt-3 pl-3 border-l-2 border-white/20 text-sm text-zinc-400 italic">
+            0.1 — In-game footage as reference for the final effect.
+          </figcaption>
+        </figure>
         <hr class="h-px bg-zinc-800" id="part-I"/>
         <h2 class="mt-10 mb-4 text-white text-4xl font-semibold">
           Part I: Terrain Scan Lines
