@@ -1010,15 +1010,29 @@ if (!IsCulled)
         </p>
         <p>
           To fix this, we have to early-out of <code class="language-cpp">GetDynamicMeshElements()</code> if our tile
-          was not selected for rendering. As always the fundamental ordering problem remains: selection happens <i>after</i>
+          was not selected for rendering.
+        </p>
+        <p class="line-through opacity-50">
+          As always the fundamental ordering problem remains: selection happens <i>after</i>
           each mesh sends its dynamic elements to the renderer. To work around this, we simply moved the selection
           phase at the end of the frame, instead of at the beginning. On frame <span class="font-mono">N-1</span>, 
           we select the tiles valid for rendering for frame <span class="font-mono">N</span>, by "stamping" the frame number on a field in the class. So, when 
           <code class="language-cpp">GetDynamicMeshElements()</code> runs on frame <span class="font-mono">N</span>, it checks early if the stamp matches
           the current frame number: if not, the function terminates early and the tile skips drawing. 
-          This 1 frame latency in rendering is almost negligible at normal frame rates, and minor hiccups like culling
+          This one-frame latency in rendering is almost negligible at normal frame rates, and minor hiccups like culling
           showing up visually at the screen sides when turning the camera rapidly can be countered by simply "relaxing" 
           culling by virtually enlarging the cone of vision.
+        </p>
+        <p class="italic text-sm">
+          September 27, 2026 update:
+        </p>
+        <p>
+          As of the most recent project version, we run an early discovery pass before 
+          <code class="language-cpp">GetDynamicMeshElements()</code> by registering each proxy on runtime creation, and
+          checking its visibility flags early in the frame. This is done using a
+          <code class="language-cpp">FSceneViewExtensionBase</code> class which allows us to hook at precise steps of
+          the rendering pipeline. When <code class="language-cpp">GetDynamicMeshElements()</code> runs later, it simply
+          early-outs if the proxy has not been selected, with no frame latency.
         </p>
         <p>
           This is the final result on a frame:
